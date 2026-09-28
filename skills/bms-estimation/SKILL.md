@@ -99,6 +99,51 @@ Append to `references/LEARNED.md`, which is read at the start of every invocatio
 One entry per rule. If a rule already exists, **edit it** rather than adding a near-duplicate - and if
 a new reason contradicts an old entry, update that entry and note the change; the newer reason wins.
 
+### Then publish the change as a pull request
+
+The skill is version-controlled at `C:\Users\ahmad\repos\gts-bms-estimation-skill`
+(`origin` = https://github.com/ahmad592002/BMS-ESTIMATION-SKILL). **Every self-upgrade goes to the repo
+as a pull request - never a direct commit to `main`.** The rule takes effect locally straight away; the
+PR is the review trail, so it must never block the estimation.
+
+Do this **once per phase at most**, when the phase is presented for review - batch that phase's learned
+rules into one PR rather than pushing per edit.
+
+1. **Write the rule to the live skill first** (`~/.claude/skills/bms-estimation/`). The estimation
+   continues on the updated rule immediately, PR or no PR.
+2. **Get it into the repo working tree.** If `~/.claude/skills/bms-estimation` is a symlink into the
+   repo, it is already there. Otherwise copy the changed files across:
+   `skills/bms-estimation/references/LEARNED.md` and `SKILL.md` if that changed too.
+3. **Branch** off an up-to-date `main`:
+   `git -C <repo> checkout main && git -C <repo> pull --ff-only`
+   then `git -C <repo> checkout -b learn/<phase>-<short-slug>` (e.g. `learn/p1-fcu-count-from-spec`).
+4. **Commit** with the reason in the message, so the PR explains itself:
+   ```
+   Learn: <rule title>
+
+   Project: <name>   Phase: <n>
+   Change: <from -> to>
+   Reason (<reason type>): <estimator's words>
+   Scope: <scope>
+   ```
+5. **Push** the branch: `git -C <repo> push -u origin <branch>`
+6. **Open the PR.** With `gh` installed:
+   `gh pr create --repo ahmad592002/BMS-ESTIMATION-SKILL --base main --head <branch> --title "Learn: <rule title>" --body "<reason, scope, and what it changes>"`
+   Without `gh`, push the branch and give the estimator the compare link to click:
+   `https://github.com/ahmad592002/BMS-ESTIMATION-SKILL/compare/main...<branch>?expand=1`
+7. **Return to `main`** in the repo afterwards so the next branch starts clean.
+8. **Report in one line** alongside the phase output:
+   `Learned: <rule> (scope: <scope>) - PR: <url>`
+
+Rules for this step:
+- **Never push to `main` directly**, and never merge your own PR - the estimator reviews and merges.
+- **Never commit client data.** Only `SKILL.md` and `references/*` belong in the PR; the `.gitignore`
+  already blocks `*.xlsm`, `*.xlsx`, `*.pdf` and `_ESTIMATION_STATE.md`, so don't force-add past it.
+- **If anything fails** - no network, auth prompt, push rejected, permission denied - the rule is
+  already saved locally, so say so plainly (`rule saved locally; PR pending: <reason>`) and carry on
+  with the phase. Do not retry in a loop, and do not stall the estimation over git.
+- If several rules accumulated while offline, open one PR covering them all when the push next works.
+
 ---
 
 # The phases
@@ -201,6 +246,10 @@ row 4 `Assigned`, then one row per panel.
 - Group by **physical proximity first** (same plantroom/floor), then discipline.
 - Leave headroom per the `Options` spare factor; split a panel rather than pack it to 100%.
 - Keep each panel's IO within one enclosure's practical module count.
+- **Hard limit: no DDC may carry more than 250 points.** Count physical (DI+AI+AO+DO) plus software
+  points, and test it **with** the `Options` spare factor applied - a panel at 220 real points is
+  already over once 20% spare is added. Split the panel rather than exceed the limit, and report each
+  panel's loading against 250 when presenting the phase.
 
 **Exit criteria (hard gate):** `Assigned` == `Total` for **every** column. A mismatch means equipment
 unassigned or double-counted - fix before presenting, never present a mismatched matrix.
