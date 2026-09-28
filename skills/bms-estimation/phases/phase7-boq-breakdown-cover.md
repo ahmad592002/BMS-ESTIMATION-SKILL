@@ -14,6 +14,36 @@ retyped**. Margin factor sits in `M2`; pricing resolves through `Product_Finder`
 
 Totals: `J110` total, `J112` total cost, `J113` Siemens, `J114` Al Fanar, `J115` local.
 
+**After generating, check nothing was dropped.** Compare the BOQ against the selection sheets - a
+valve or actuator selected in Phase 6 can fail to reach the BOQ. Reconcile part by part, not by
+eyeballing the total.
+
+## Product Finder - carry every Siemens part across
+
+**This step comes right after the BOQ and before the Breakdown means anything.** The Product Finder is
+the Siemens quotation: its total `K14` is what `Breakdown!D23` reads, so until it holds the current
+BOQ the cost is stale and every margin is wrong.
+
+Take **every Siemens part code and quantity from the BOQ** into the item table:
+
+- The item table starts at **row 17**. Write **only two columns**:
+  - **C = `Art.Type`** - the part code exactly as the BOQ's `Model number` (e.g. `VVF42.65-50`,
+    `G120P-45/32A`, `TXM1.16D`)
+  - **E = `Qty`**
+- `D` (product number), `F` (list price), `G` (customs %), `J`, `K` and `L` (line total) are **lookup
+  formulas against `Listprice_...`** and fill themselves. Never type over them.
+- A code that resolves to a product number is valid; `#N/A` in D means the code is not in the price
+  list - fix the code rather than forcing a price.
+- **Only Siemens parts.** Non-Siemens lines (AX field devices, Onicon meters, Al Fanar enclosures,
+  local items) are not in the Siemens quotation and belong in the Breakdown's other supplier rows.
+- Rows may already be part-filled from an earlier run, with **gaps** - scan from row 17 for the first
+  empty `C` rather than appending at the end, and never leave a duplicate code.
+- Writing through COM: the qty cell rejects an integer (`Unable to cast Int32 to String`) - write it
+  **as a string**.
+
+Check afterwards: `G13` = number of line items, `K14` = Siemens list total. `G13` should equal the
+count of distinct Siemens models in the BOQ.
+
 ## Breakdown
 
 Project header (Project Name, Location, Reference, Division `Automation`, Customer, System `BMS`,

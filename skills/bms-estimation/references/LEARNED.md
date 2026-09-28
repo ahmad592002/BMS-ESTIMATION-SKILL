@@ -240,3 +240,32 @@ Entry format:
 - **Reason type:** my error (avoided)
 - **Scope:** always
 - **Also changed in SKILL.md:** no
+
+## After the BOQ, carry every Siemens part into the Product Finder
+- **Phase:** 7 BOQ   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** The Product Finder is the Siemens quotation and its `K14` feeds `Breakdown!D23`, so it must
+  be repopulated from the BOQ after every BOQ generation. Item table starts **row 17**; write only
+  **C = Art.Type** (the BOQ `Model number`) and **E = Qty** - D/F/G/J/K/L are lookups against
+  `Listprice_...` and fill themselves. Siemens parts only. Scan from row 17 for the first empty C
+  (earlier runs leave gaps); never duplicate a code. Through COM the qty must be written as a string.
+  Verify `G13` (line count) equals the distinct Siemens models in the BOQ.
+- **Change:** Product Finder left at 27 controller-era items while the BOQ held 38 Siemens models ->
+  all 38 carried across; K14 433,649 -> 981,127, Siemens cost 216,825 -> 490,564, gross margin
+  57.96% (fiction) -> 19.81% (real)
+- **Reason:** "other then the workspace we generate the boq take all field code to the sheet of
+  product finder and put all siemens product"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** phases/phase7 - new "Product Finder" section
+
+## Check the BOQ against the selection sheets - it silently drops lines
+- **Phase:** 7 BOQ   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** `StartBOQGeneration` does not necessarily carry every selected item. After generating,
+  reconcile the BOQ part by part against `ValvesAndActuators`, `VFDs`, `DamperActuators` and
+  `Workstation` - not by comparing totals.
+- **Change:** found `VXF42.65-50` x2 and `SQL36E65` x3 selected on the valve sheet but absent from the
+  BOQ, therefore unpriced
+- **Reason:** spotted while reconciling Siemens parts into the Product Finder
+- **Reason type:** my error (caught)
+- **Scope:** always
+- **Also changed in SKILL.md:** phases/phase7 - BOQ section
