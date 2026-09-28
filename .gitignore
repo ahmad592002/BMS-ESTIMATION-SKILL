@@ -1,0 +1,16 @@
+# Per-project estimation state belongs with the project, not in this repo
+_ESTIMATION_STATE.md
+
+# Never commit client workbooks, tender data or pricing files
+*.xlsm
+*.xlsx
+*.xls
+*.pdf
+out/
+dump/
+
+# OS / editor noise
+Thumbs.db
+desktop.ini
+.DS_Store
+~$*
