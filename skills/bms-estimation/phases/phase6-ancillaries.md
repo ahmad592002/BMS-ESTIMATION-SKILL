@@ -27,9 +27,34 @@ This is the biggest trap in the phase:
 ## Sheet notes
 
 - **Workstation** - physical points (DI/AI/AO/DO) plus software points by protocol roll up to
-  `Total BA`, which sizes the server/licence: `CMD.06`, `CCA-CMPXL-BA`, `CCA-1000-BA`, workstation PC,
-  27" monitor, printers, UPS. Re-check the licence tier after any IO change. If "Other" is non-zero,
-  go back to Phase 2 and tag the protocols.
+  `Total BA`, which sizes the server/licence: `CMD.06`, `CCA-CMPXL-BA`, workstation PC, 27" monitor,
+  printers, UPS. Re-check the licence tier after any IO change. If "Other" is non-zero, go back to
+  Phase 2 and tag the protocols. **Then verify the licence extensions - see below.**
+
+### BA licence extensions - always verify, the macro over-adds
+
+The compact licence **`CCA-CMPXL-BA` already includes 2000 BA points.** The test is on points **with
+spare applied**: `Total BA * (1 + Options spare)`.
+
+| Total BA + spare | Extension lines |
+|---|---|
+| **<= 2000** | **None.** The compact licence covers it - no `CCA-*-BA` extension in the BOQ at all |
+| **> 2000** | Deduct the 2000 included, then cover the remainder: `CCA-1000-BA`, `CCA-500-BA`, `CCA-100-BA` (`CCA-5000-BA` only on the non-compact route) |
+
+Compact is only chosen when BA <= 5000, FIRE <= 500, ELEC <= 500, SCADA <= 1000, METER <= 30.
+
+**`SelectBALicenses` gets this wrong below 2000 - check its output every time:**
+
+1. The deduction is guarded by `If (Compact And TotalBA >= 2000)`, so **under 2000 the 2000 included
+   points are never deducted** and the full count falls through into the extension ladder.
+2. `BA1000 = RemainingBA / 1000` assigns a Double into an Integer, so VBA **rounds instead of
+   truncating** (1.656 -> 2), adding one size too many.
+
+Worked example (SDA SCITECH Khobar): 1380 BA points, 20% spare -> 1656. Correct answer is **no
+extension**. The macro produces `CCA-1000-BA` x2.
+
+**After running `GenerateWorstation`, read the parts list and delete any `CCA-*-BA` extension line the
+table above does not call for.** State in the review what the licence works out to and why.
 - **DamperActuators** - `Unit Name | Actuator Title | Type | Signal | End Switch | Qty | Duct Size (m²)
   | Actuator Description | Part Number | Accessory`. Type `S.R.`/`N.S.R.`, signal `ON/OFF` or
   `Modulating` (`Options` defaults: N.S.R 2.5, S.R 2.5, F.S. 1.5 m²).

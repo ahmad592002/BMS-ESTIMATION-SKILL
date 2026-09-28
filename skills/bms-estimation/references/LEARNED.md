@@ -210,3 +210,33 @@ Entry format:
 - **Reason type:** GTS standard
 - **Scope:** always
 - **Also changed in SKILL.md:** no
+
+## Verify BA licence extensions - none below 2000 points, and the macro over-adds
+- **Phase:** 6 Ancillaries (Workstation)   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** `CCA-CMPXL-BA` (compact) already includes 2000 BA points. Test `Total BA * (1 + spare)`:
+  at or below 2000 the BOQ gets **no** `CCA-*-BA` extension line at all; above 2000, deduct the
+  included 2000 and cover the remainder with `CCA-1000-BA` / `CCA-500-BA` / `CCA-100-BA`
+  (`CCA-5000-BA` only on the non-compact route). Always read the parts list after
+  `GenerateWorstation` and delete extensions that are not called for.
+- **Change:** workstation licence accepted as the macro generated it -> extension lines verified
+  against the 2000-point allowance every time
+- **Reason:** "the extention is not needed if the number of point +20% less then 2000 if more we add
+  item 100 point 500 200 1000 extra but the auto somtimes add one not needed" / "no i put nothing in
+  this project because is less then 2000"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** phases/phase6-ancillaries.md - new "BA licence extensions" section
+
+## Why SelectBALicenses over-adds (two VBA defects)
+- **Phase:** 6 Ancillaries   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** Two defects in `WorstationModule.SelectBALicenses` make it add unneeded extensions:
+  (1) the deduction is guarded by `If (Compact And TotalBA >= 2000)`, so below 2000 - exactly when the
+  compact licence already covers everything - the 2000 included points are never deducted and the full
+  count falls into the extension ladder; (2) `BA1000 = RemainingBA / 1000` assigns a Double to an
+  Integer, so VBA rounds rather than truncates (1.656 -> 2). Spare IS applied upstream at line 16
+  (`TotalBA = TotalBA * (1 + Spare)`), so the ladder always works on the spared figure.
+- **Change:** n/a - root cause of the over-add, found by reading the VBA
+- **Reason:** traced after the estimator reported "the auto somtimes add one not needed"
+- **Reason type:** my error (avoided)
+- **Scope:** always
+- **Also changed in SKILL.md:** no
