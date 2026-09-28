@@ -55,6 +55,38 @@ House standard seen across YALJ / P.Mansour / RAPEH: `QFM2120` (duct H&T), `QAE2
 `QBM81-10` (filter DPS), `AX-UL-SEP380-2` (ultrasonic level), `QBE3000-D16` (water DP), `RDF440BN`
 (modulating room thermostat).
 
+
+## Build IOSummary with the sheet's own macros - never write raw cells
+
+Hand-writing values destroys the block design. Use the workbook's routines:
+
+| Step | Macro |
+|---|---|
+| Clear the sheet | `IOSummaryModule.ClearIOSummary` |
+| Create one formatted block per equipment | `AddEquipmentFromEquipmentList(<EquipmentList Qty cell>, <row>)` - it fills `IOTemplate` then `CopyIOTemplate` inserts the formatted 30-row block |
+| Write a point | `AddIO(<column B cell>, <text>, BI, BO, AI, AO, SPBACNET, SPKNX, SPMODBUS)` |
+| Point + device + comment in one call | `AddIOAndDeviceAnMoveNext(...)` |
+| Add a point row beyond the template's capacity | `InsertIOLine(<cell>)` - copies the formatted row **and** rebuilds its H:L formulas |
+
+- `AddEquipmentFromEquipmentList` takes the **Qty cell (column B)** of the EquipmentList row, not the
+  name: it reads the name from `offset(0,1)` and the Type from `offset(0,3)`.
+- A template block gives **22 usable point rows** (equipment row at header+2, points from header+3,
+  TOTAL at header+25). Anything larger needs `InsertIOLine`.
+- **Insert and fill blocks bottom-up**, so inserts never shift blocks already written.
+
+## Lay the block out cleanly
+
+- **Sort the points by type within each block**: DI, then AI, AO, DO, SP. Never leave them in the
+  order they came out of the source document.
+- **Leave exactly one blank row** between the last point and the TOTAL row, in every block. Delete the
+  rest of the template's unused rows - a 23-block sheet loses ~150 empty rows this way.
+- When rewriting or trimming rows, **never ClearContents across H:L** - those are the
+  `= C:G * $A<qty row>` all-systems formulas. Wipe them and every block silently totals zero. Clear
+  only B:G and M:P, or restore H:L afterwards.
+- One equipment row per **assembly**: a duty/standby set with its own package tags (`BSP-01`, `BSP-02`,
+  `BSP-SET-01`) is **qty 1** carrying all the set's points, not qty 2 - otherwise the shared package
+  points are multiplied.
+
 ## Software points - tag the protocol in column P
 
 The Workstation sheet classifies software points with

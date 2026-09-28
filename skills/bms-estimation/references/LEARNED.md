@@ -269,3 +269,33 @@ Entry format:
 - **Reason type:** my error (caught)
 - **Scope:** always
 - **Also changed in SKILL.md:** phases/phase7 - BOQ section
+
+## Build IOSummary with the sheet's macros, sort by type, one blank row per block
+- **Phase:** 2 IOSummary   **Date:** 2026-09-28   **Project:** Riyadh Air Premium Hub
+- **Rule:** Never write raw cells into IOSummary - it destroys the block design. Use
+  `ClearIOSummary`, then `AddEquipmentFromEquipmentList(<EquipmentList Qty cell>, <row>)` per
+  equipment, `AddIO` per point, and `InsertIOLine` when a block needs more than the template's 22
+  point rows; insert and fill bottom-up. Then lay the block out: **sort the points by type**
+  (DI, AI, AO, DO, SP) and **leave exactly one blank row** before TOTAL, deleting the rest.
+  When trimming, never `ClearContents` across H:L - those are the `C:G * $A<qty row>` all-systems
+  formulas and wiping them makes every block total zero.
+- **Change:** hand-written cells, source order, ~150 surplus blank rows -> macro-built formatted
+  blocks, points grouped by type, one spare row each (sheet 691 -> 544 rows)
+- **Reason:** "you break the designe of the iosummary you need to just full it not break designe" /
+  "delete the free row and keep one in every box like pump box one space and seperate io point by
+  types"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** phases/phase2 - two new sections
+
+## A duty/standby set with package tags is one equipment row, not one per pump
+- **Phase:** 1 EquipmentList / 2 IOSummary   **Date:** 2026-09-28   **Project:** Riyadh Air Premium Hub
+- **Rule:** Where the IO list carries a set-level tag alongside the individual units (`BSP-01`,
+  `BSP-02`, `BSP-SET-01`), enter **one row at qty 1** covering the whole assembly and put all its
+  points in that block. Entering qty 2 multiplies the shared package points.
+- **Change:** booster / circulation / submersible pumps at qty 2 -> qty 1 "... Set"; Total BA
+  591 -> 556
+- **Reason:** caught when IOSummary totals exceeded the IO list's own count by exactly the set points
+- **Reason type:** my error (caught)
+- **Scope:** always
+- **Also changed in SKILL.md:** phases/phase2 - "Lay the block out cleanly"
