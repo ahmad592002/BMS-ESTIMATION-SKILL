@@ -48,4 +48,17 @@ Entry format:
 - **Scope:** always
 - **Also changed in SKILL.md:** "Self-upgrade: ask WHY, then record"
 
+## Self-upgrades are published as pull requests, never pushed to main
+- **Phase:** all   **Date:** 2026-09-28   **Project:** (skill setup)
+- **Rule:** After recording a rule in this file, batch that phase's learned rules onto a
+  `learn/<phase>-<slug>` branch and open a PR against `main` of
+  ahmad592002/BMS-ESTIMATION-SKILL. Never commit to `main` directly and never self-merge - the
+  estimator reviews. The rule applies locally at once; a failed push never blocks the estimation.
+- **Change:** rules saved only to the local skill folder -> local save plus a PR for review
+- **Reason:** "the skills in it update should pull request to the repo"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** "Self-upgrade: ask WHY, then record" -> new subsection
+  "Then publish the change as a pull request"
+
 <!-- New entries go below this line -->
