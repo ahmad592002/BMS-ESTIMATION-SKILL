@@ -78,6 +78,10 @@ Hand-writing values destroys the block design. Use the workbook's routines:
 
 - **Sort the points by type within each block**: DI, then AI, AO, DO, SP. Never leave them in the
   order they came out of the source document.
+- **Put a small shaded title row above each group** - "Digital Inputs", "Analog Inputs",
+  "Analog Outputs", "Digital Outputs", "Software Points" - with `Interior.ColorIndex = 15`, the same
+  style the workbook uses for its own `IsTitle` rows. A title row carries no IO value and no H:L
+  formula.
 - **Leave exactly one blank row** between the last point and the TOTAL row, in every block. Delete the
   rest of the template's unused rows - a 23-block sheet loses ~150 empty rows this way.
 - When rewriting or trimming rows, **never ClearContents across H:L** - those are the
@@ -110,3 +114,22 @@ The protocol is usually stated in the point description or implied by the select
 
 Per-type point counts, the grand total, the field-device list, and the software-point split by
 protocol.
+
+## Build the layout in the fill pass - never retrofit rows into finished blocks
+
+Titles, sorting and blank-row trimming must be decided **before** the points are written, and applied
+in the same pass that fills the block. Do not try to insert title rows, re-sort, or delete rows in a
+block that is already populated:
+
+- repeated single-row `InsertIOLine` calls across many blocks destabilise Excel - in one run it
+  crashed into AutoRecover and reopened the file as `.xlsb`;
+- a batched `Rows(a:b).Insert` followed by clear-and-rewrite silently dropped point names and left the
+  totals wrong (BA 554 instead of 556);
+- `ClearContents` over H:L wipes the all-systems formulas.
+
+If a populated block needs a different layout, **clear the sheet and rebuild it**: `ClearIOSummary`,
+recreate the blocks, then write titles and sorted points together. That path is reliable and takes
+seconds.
+
+Save after each good state, and if a write fails, close the workbook **without saving** and reopen
+from disk rather than trying to repair a half-written sheet.
