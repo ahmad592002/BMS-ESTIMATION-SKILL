@@ -422,3 +422,19 @@ Entry format:
 - **Reason type:** GTS standard
 - **Scope:** always
 - **Also changed in SKILL.md:** no
+
+## Mark in yellow everything not 100% from the project data
+- **Phase:** 1-2 (all phases)   **Date:** 2026-10-01   **Project:** Al Moosa University
+- **Rule:** Any quantity, point, software-point count, schematic choice or device that is not taken
+  directly from this project's drawings / spec / BOQ gets a yellow fill (`Interior.Color = 65535`) and
+  a one-line reason. IOSummary: yellow on B:G of the point row (and M:N if the device is the doubt),
+  reason in column Q "Check note" - never in P, which must stay the exact protocol for SP rows.
+  Equipment-level doubts (qty, which schematic applies) go yellow on A:B of the equipment row and on
+  EquipmentList B:C with the reason in column F. Assumed SP counts are ALWAYS yellow.
+- **Change:** 259 point rows + 63 equipment rows marked; reasons in Q / EquipmentList F
+- **Reason:** "if anything are not 100% true from the data you have in this project or if you assumed
+  the number of software point you should mention them or label them in yellow color to be checked
+  by myself"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** no
