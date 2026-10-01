@@ -440,3 +440,15 @@ Entry format:
 - **Reason type:** GTS standard
 - **Scope:** always
 - **Also changed in SKILL.md:** no
+
+## Name every point by its component as drawn - never a bare "FILTER STATUS"
+- **Phase:** 2 IOSummary   **Date:** 2026-10-01   **Project:** Al Moosa University
+- **Rule:** When a strip/schedule label is generic (FILTER STATUS), take the component name from the
+  equipment symbol it is drawn under on the same sheet, left to right: AHU/MAHU -> PANEL FILTER, BAG
+  FILTER; ERU -> FRESH AIR PRE-FILTER, FRESH AIR BAG FILTER, EXHAUST AIR BAG / PANEL FILTER; ECU -> PRE,
+  ELECTROSTATIC PRECIPITATOR, BAG, HEPA, CARBON. Same for other repeated generic labels.
+- **Change:** 33 IOSummary rows "FILTER STATUS" -> named by filter type
+- **Reason:** "for the filter you write only filter status you should write his type like bag filter prefilter"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** no
