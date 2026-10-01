@@ -300,16 +300,31 @@ Entry format:
 - **Scope:** always
 - **Also changed in SKILL.md:** phases/phase2 - "Lay the block out cleanly"
 
-## Group titles inside each IOSummary block
-- **Phase:** 2 IOSummary   **Date:** 2026-09-28   **Project:** Riyadh Air Premium Hub
-- **Rule:** Above each point group put a small shaded title row - "Digital Inputs", "Analog Inputs",
-  "Analog Outputs", "Digital Outputs", "Software Points" - using `Interior.ColorIndex = 15` (the
-  workbook's own `IsTitle` style). Title rows carry no IO value and no H:L formula.
-- **Change:** sorted points with no headings -> 34 title rows across 23 blocks
-- **Reason:** "not jyst like that en + add small title to every group"
+## Group IOSummary points by component, not by point type
+- **Phase:** 2 IOSummary   **Date:** 2026-10-01   **Project:** Al Moosa University (supersedes RAPEH point-type titles)
+- **Rule:** Inside each block, put a shaded title row (`Interior.ColorIndex = 15`, bold) per COMPONENT -
+  Supply Fan, Exhaust Fan, Dampers, Filters, Coils & Valves, Heat Recovery, Electric Heater, Sensors,
+  Pump, Chiller, Cooling Tower Fan, Breakers & Protection, Power Metering, Status & Alarms, Software
+  Integration - and order the points DI, AI, AO, DO, SP inside each title. An airflow-proving DPS goes
+  under the fan it proves. Title rows carry no IO value.
+- **Change:** titles "Digital Inputs / Analog Inputs / ..." -> component titles (196 blocks rebuilt)
+- **Reason:** "i like the way you categorize them but instead of these subcategory i want to separate
+  them based on damper (control position) fan ... like category not based on type of point"
 - **Reason type:** GTS standard
-- **Scope:** always
+- **Scope:** always (provisional - confirm)
 - **Also changed in SKILL.md:** phases/phase2 - "Lay the block out cleanly"
+
+## ClearIOSummary only deletes rows 1-2000
+- **Phase:** 2 IOSummary   **Date:** 2026-10-01   **Project:** Al Moosa University
+- **Rule:** `IOSummaryModule.ClearIOSummary` (called by the EquipmentList button) deletes `A1:A2000`
+  only. A previous IOSummary longer than 2000 rows leaves old blocks below that mix with the new ones.
+  Delete the whole used range of IOSummary before pressing the button, then check block count ==
+  EquipmentList rows.
+- **Change:** 199 blocks (old leftovers) -> full clear first, 196 blocks
+- **Reason:** block-count check failed on rebuild
+- **Reason type:** my error (caught)
+- **Scope:** always
+- **Also changed in SKILL.md:** no
 
 ## Build the IOSummary layout in the fill pass, never retrofit into filled blocks
 - **Phase:** 2 IOSummary   **Date:** 2026-09-28   **Project:** Riyadh Air Premium Hub
