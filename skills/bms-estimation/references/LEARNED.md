@@ -427,11 +427,13 @@ Entry format:
 - **Phase:** 1-2 (all phases)   **Date:** 2026-10-01   **Project:** Al Moosa University
 - **Rule:** Any quantity, point, software-point count, schematic choice or device that is not taken
   directly from this project's drawings / spec / BOQ gets a yellow fill (`Interior.Color = 65535`) and
-  a one-line reason. IOSummary: yellow on B:G of the point row (and M:N if the device is the doubt),
-  reason in column Q "Check note" - never in P, which must stay the exact protocol for SP rows.
+  a one-line reason. Mark ONLY THE CELL IN DOUBT, never the whole row: SP count -> G;
+  inferred / assumed point -> its IO cell (C:F); device type -> N; device qty -> M; equipment qty -> A;
+  schematic choice / typical points / borrowed schedule -> the equipment name cell B once per block.
+  Reason in column Q "Check note" - never in P, which must stay the exact protocol for SP rows.
   Equipment-level doubts (qty, which schematic applies) go yellow on A:B of the equipment row and on
   EquipmentList B:C with the reason in column F. Assumed SP counts are ALWAYS yellow.
-- **Change:** 259 point rows + 63 equipment rows marked; reasons in Q / EquipmentList F
+ whole rows -> 104 single cells + 92 qty/name cells ("can you specify the something need to check no every thing yellow like that")
 - **Reason:** "if anything are not 100% true from the data you have in this project or if you assumed
   the number of software point you should mention them or label them in yellow color to be checked
   by myself"
