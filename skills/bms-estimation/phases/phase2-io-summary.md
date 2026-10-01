@@ -133,3 +133,49 @@ seconds.
 
 Save after each good state, and if a write fails, close the workbook **without saving** and reopen
 from disk rather than trying to repair a half-written sheet.
+
+## Proven workflow (Al Moosa University, 2026-10 - estimator: "very good way")
+
+**A. Read the points from the Site control schematics (B-93), all of them, before generating.**
+- Two formats exist:
+  1. *BMS SCHEDULE tables* (DI / DO / AI / AO / ALARM / HARDWIRED INTERLOCK / COMMUNICATION): parse
+     with `scripts/parse_sched.ps1` (word coordinates from MiKTeX `pdftotext -bbox`; also accepts
+     "PMS SCHEDULE"). COMMUNICATION = software point.
+  2. *DDC point strips* (vertical labels over DI/DO/AI/AO rows, marks are drawn dots, filled or
+     hollow, "x2"/"X2" multipliers): `scripts/parse_strip.ps1` renders the strip at 200 dpi and finds
+     dots/rings with a compiled C# scanner, ignores anything inside a text box, de-duplicates, and
+     types any label without a detected mark from its wording - flagged "inferred".
+  Use the table where a sheet has both. `scripts/combine.ps1` merges them into `points_all.csv`.
+- **Read the main plant sheets by eye** (chillers, cooling towers, pump groups, refrigerant
+  purge) - several equipment per sheet; the auto-parse is unreliable there.
+- Present per-unit points per equipment type + a review workbook (Per Equipment / Per Sheet /
+  All Points) before generating.
+
+**B. Templates and mapping** (`scripts/io_templates.txt`, `io_map.txt`, `io_lib.ps1`): one template
+per equipment kind - `@SHEET:nnn[:group]` pulls drawn points; hand-entered lines for read-by-eye or
+typical points. Keep the estimator's own block values (e.g. chiller SP 15). Dry-run first
+(`build_iosummary.ps1 -DryRun`) - it prints per-row IO and the expected grand total.
+
+**C. Generate with the EquipmentList button, then complete** (`scripts/run_all.ps1`):
+fully clear IOSummary (ClearIOSummary stops at row 2000) -> run `GenerateIOPointsFromEquipmentList`
+(stops at row 120) -> append the remaining rows with the macro's own steps -> fill every block
+bottom-up (`fill_iosummary.ps1`) -> rewrite H:L to each block's qty row (`fix_hl.ps1`) -> verify
+expected == got and Workstation "Other" = 0.
+
+**D. Layout:** points grouped by COMPONENT (Supply Fan, Exhaust Fan, Dampers, Filters, Coils &
+Valves, Heat Recovery, Sensors, Pump, Chiller, Breakers & Protection, Power Metering, Software
+Integration ...), DI/AI/AO/DO/SP inside each, grey bold title rows, one blank row before TOTAL.
+Name every point by its drawn component (PANEL / BAG / PRE / HEPA / CARBON filter - never a bare
+"FILTER STATUS").
+
+**E. Field devices** (`fill_devices.ps1`, rules in `io_lib.ps1` Get-Device2 + `io_flags.ps1`):
+only where the instrument is drawn, model = previous GTS projects' choice, column M = total
+(`=<per unit>*$A<qty row>`), dampers/valves/VFDs to their selection sheets.
+
+**F. Mark doubts cell by cell** (`apply_flags2.ps1`, rules in `io_flags2.ps1`): SP -> G, point ->
+its IO cell, device -> N, device qty -> M, equipment qty -> A, schematic choice / typical -> name
+cell B; reason in column Q "Check note". Assumed SP counts are always yellow.
+
+**G. Sources workbook** (`build_io_source.ps1`): Equipment Summary, IO Points by Equipment (every
+point with drawing number, how it was read, basis, device -> model, note), Source Drawings,
+To Check (yellow), Field Devices. Totals must equal the IOSummary.

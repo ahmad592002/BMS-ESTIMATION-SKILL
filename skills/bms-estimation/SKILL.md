@@ -55,6 +55,25 @@ raw data -> EquipmentList -> IOSummary -> DDC List -> DDCSummary -> DDCFullSumma
                             Workstation + dampers + valves + VFDs ->  BOQ -> Breakdown -> Cover Page
 ```
 
+## Proven way of working (Al Moosa University, 2026-10 - keep doing it this way)
+
+- **Phase 1 - equipment from the drawings, not the BOQ.** Read the B-92 BMS risers as image tiles;
+  build the per-tag takeoff workbook (tag -> DDC/RIO/PLC -> room -> interface, duplicates kept at
+  qty 0); EquipmentList = one row per family per building, synced to the takeoff.
+- **Phase 2 - points from the B-93 schematics, every sheet.** Parse BMS schedule tables and DDC dot
+  strips (`scripts/`), read plant sheets by eye, show the per-unit list and a review workbook
+  *before* generating. Generate with the EquipmentList **button**, then complete the rest
+  (rows > 120), group points **by component**, name them as drawn, add **field devices** only
+  where drawn with **previous-project models**, rewrite H:L, verify totals.
+- **Every deliverable gets a "where it came from" workbook** (takeoff; IO Summary Sources).
+- **Yellow only the cell in doubt**, reason beside it (IOSummary column Q, EquipmentList column F).
+  Assumed software-point counts are always yellow.
+- **Project root holds only final files**; backups and superseded files go to `Old Versions`.
+- **Excel automation**: see `scripts/README.md` gotchas (BindToMoniker, no `$x.Run` with
+  arguments, case-insensitive variables, cast every cell value).
+
+Scripts for all of this: `scripts/` (see its README for the run order).
+
 ## Hard gates
 
 These are refusals, not warnings. Never present a phase that fails its gate - fix it first.
@@ -136,6 +155,7 @@ Never push to `main`, never self-merge, never commit client data (`.gitignore` b
 | `references/workbook-mechanics.md` | Before any workbook read or write |
 | `references/state-template.md` | Creating `_ESTIMATION_STATE.md` at Phase 0 |
 | `references/dump_sheets.ps1` | Reading a workbook without Excel |
+| `scripts/README.md` | Phases 1-2: takeoff, schematic parsing, IOSummary build, devices, checks |
 
 Reference estimations live in `~/OneDrive/Desktop/GTS/BMS_PROJECTS/` (Ajyad Tower, YALJ, Prince
 Mansour, RX Premium Hub). **YALJ is the best worked example** - all 35 sheets filled.
