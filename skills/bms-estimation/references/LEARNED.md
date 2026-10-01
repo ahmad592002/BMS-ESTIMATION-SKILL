@@ -299,3 +299,95 @@ Entry format:
 - **Reason type:** my error (caught)
 - **Scope:** always
 - **Also changed in SKILL.md:** phases/phase2 - "Lay the block out cleanly"
+
+## Group IOSummary points by component, not by point type
+- **Phase:** 2 IOSummary   **Date:** 2026-10-01   **Project:** Al Moosa University (supersedes RAPEH point-type titles)
+- **Rule:** Inside each block, put a shaded title row (`Interior.ColorIndex = 15`, bold) per COMPONENT -
+  Supply Fan, Exhaust Fan, Dampers, Filters, Coils & Valves, Heat Recovery, Electric Heater, Sensors,
+  Pump, Chiller, Cooling Tower Fan, Breakers & Protection, Power Metering, Status & Alarms, Software
+  Integration - and order the points DI, AI, AO, DO, SP inside each title. An airflow-proving DPS goes
+  under the fan it proves. Title rows carry no IO value.
+- **Change:** titles "Digital Inputs / Analog Inputs / ..." -> component titles (196 blocks rebuilt)
+- **Reason:** "i like the way you categorize them but instead of these subcategory i want to separate
+  them based on damper (control position) fan ... like category not based on type of point"
+- **Reason type:** GTS standard
+- **Scope:** always (provisional - confirm)
+- **Also changed in SKILL.md:** phases/phase2 - "Lay the block out cleanly"
+
+## ClearIOSummary only deletes rows 1-2000
+- **Phase:** 2 IOSummary   **Date:** 2026-10-01   **Project:** Al Moosa University
+- **Rule:** `IOSummaryModule.ClearIOSummary` (called by the EquipmentList button) deletes `A1:A2000`
+  only. A previous IOSummary longer than 2000 rows leaves old blocks below that mix with the new ones.
+  Delete the whole used range of IOSummary before pressing the button, then check block count ==
+  EquipmentList rows.
+- **Change:** 199 blocks (old leftovers) -> full clear first, 196 blocks
+- **Reason:** block-count check failed on rebuild
+- **Reason type:** my error (caught)
+- **Scope:** always
+- **Also changed in SKILL.md:** no
+
+## Build the IOSummary layout in the fill pass, never retrofit into filled blocks
+- **Phase:** 2 IOSummary   **Date:** 2026-09-28   **Project:** Riyadh Air Premium Hub
+- **Rule:** Decide titles, sort order and blank rows before writing, and apply them in the same pass
+  that fills each block. Retrofitting layout into populated blocks fails: repeated `InsertIOLine`
+  calls crashed Excel into AutoRecover (file reopened as `.xlsb`); a batched `Rows.Insert` plus
+  clear-and-rewrite dropped point names and left BA at 554 instead of 556. To change the layout of a
+  filled sheet, `ClearIOSummary` and rebuild. Save after every good state; on a failed write close
+  **without saving** and reopen from disk rather than repairing a half-written sheet.
+- **Change:** three failed retrofit attempts -> clean rebuild with titles written during the fill
+- **Reason:** observed across three consecutive failures in one session
+- **Reason type:** my error (caught)
+- **Scope:** always
+- **Also changed in SKILL.md:** phases/phase2 - new section
+
+## Equipment quantities come from the drawings when the client BOQ has no equipment count
+- **Phase:** 1 EquipmentList   **Date:** 2026-10-01   **Project:** Al Moosa University
+- **Rule:** Build the EquipmentList from the drawings (BMS risers / schematics / schedules) - the client
+  BOQ often prices only controllers, field devices and LS items and carries no count for chillers, AHUs,
+  fans, pumps or boards. Where the BOQ does quantify a line that the drawing also counts (e.g. FCU / VAV
+  unitary controllers), follow the drawing in the EquipmentList, note the BOQ figure in the row text, and
+  re-check it in Phase 2. Also build a per-tag takeoff workbook (tag -> DDC/RIO/PLC -> room) when the
+  estimator wants to see "every equipment and where it connects".
+- **Change:** MAB FCU 348 -> 139 and VAV 449 -> 691 (BOQ -> drawing); chillers 3 -> 5; +3 refrigerant
+  detectors; per-tag takeoff workbook produced
+- **Reason:** "in the boq no count see it if you want"
+- **Reason type:** project condition
+- **Scope:** this project
+- **Also changed in SKILL.md:** no
+
+## The EquipmentList "Generate IO" button stops at row 120 - add the rest yourself
+- **Phase:** 2 IOSummary   **Date:** 2026-10-01   **Project:** Al Moosa University
+- **Rule:** `EquipmentListModule.GenerateIOPointsFromEquipmentList` (the EquipmentList button) loops
+  only `Do While equipment.Row <= 120` and steps `currentRow += 29`. Run the button first (as the
+  estimator asks), then append blocks for rows 121+ with the same steps the macro uses: write IOTemplate
+  A4 = qty, B2 = Type, B4 = name; copy IOTemplate rows 1:30; insert at the next currentRow; clear
+  B2, A4:G26, M4:N26. Check block count == EquipmentList rows before filling points.
+- **Change:** 119 blocks from the button -> 196 blocks (77 appended)
+- **Reason:** "generate the io summary in the button in the equipment list then complete points"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** no
+
+## IOSummary H:L formulas are row-relative - rewrite them after inserting rows
+- **Phase:** 2 IOSummary   **Date:** 2026-10-01   **Project:** Al Moosa University
+- **Rule:** Template formulas read `=IF(C5="","",IF(C5*$A4>0,C5*$A4,""))` - the qty reference `$A4` is
+  column-absolute but ROW-RELATIVE, so copying a row to enlarge a block makes it drift ($A5, $A6...).
+  After any row insert, rewrite H:L of every point row to the block's qty row (what `InsertIOLine` does),
+  then verify per block: TOTAL C:G x qty == TOTAL H:L. A run that skipped this under-counted DI by 492.
+- **Change:** drifting formulas in 16 large blocks -> all 2065 rows rewritten; totals reconciled
+- **Reason:** totals check failed (DI 5137 vs 5629 expected)
+- **Reason type:** my error (caught)
+- **Scope:** always
+- **Also changed in SKILL.md:** no
+
+## Calling workbook macros with arguments through COM can raise a VBA debug dialog
+- **Phase:** 2 IOSummary   **Date:** 2026-10-01   **Project:** Al Moosa University
+- **Rule:** `$x.Run(...AddEquipmentFromEquipmentList, <Range>, 1)` raised a VBA error dialog that froze
+  Excel automation. Run only parameterless button macros through COM; replicate argument macros with
+  direct COM steps. Cast every value written to a cell (`[string]`, `[double]`) - passing a PowerShell
+  wrapped value raises "Specified cast is not valid".
+- **Change:** macro-with-arguments calls -> direct COM steps
+- **Reason:** estimator reported "error debub"; build blocked until the dialog was closed
+- **Reason type:** my error (caught)
+- **Scope:** always
+- **Also changed in SKILL.md:** no
