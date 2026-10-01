@@ -409,3 +409,16 @@ Entry format:
 - **Reason type:** GTS standard
 - **Scope:** always
 - **Also changed in SKILL.md:** no
+
+## Keep only final files in the project folder - everything else goes to "Old Versions"
+- **Phase:** all   **Date:** 2026-10-01   **Project:** Al Moosa University
+- **Rule:** Save every backup (`SaveCopyAs`) and every superseded deliverable straight into an
+  `Old Versions\` subfolder of the project. The project root holds only the inputs (BOQ, Drawings,
+  Specifications), the live workbook, the current deliverables and `_ESTIMATION_STATE.md`. When a
+  deliverable is replaced, move the old one there (rename it to say what it lacks) and give the new
+  one the clean name.
+- **Change:** 7 backups + 2 superseded files moved to `Old Versions\`; "(with devices)" file renamed
+- **Reason:** "i want to add folder and any file not the final version put it in the folder"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** no
