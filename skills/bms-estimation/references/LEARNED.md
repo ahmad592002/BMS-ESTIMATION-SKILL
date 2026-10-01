@@ -391,3 +391,21 @@ Entry format:
 - **Reason type:** my error (caught)
 - **Scope:** always
 - **Also changed in SKILL.md:** no
+
+## Field devices: take them from the drawn instruments, models as previous projects, M = total qty
+- **Phase:** 2 IOSummary   **Date:** 2026-10-01   **Project:** Al Moosa University
+- **Rule:** Give a field device only to points whose instrument is drawn on the schematic (DPS, TT/TW,
+  T/RH, DPT, PIT/PT, FS, LS, AQ, CO2, current transducer) and pick the model GTS used before: fan DPS
+  QBM81-5, filter DPS QBM81-10, duct T&RH QFM2120, duct T QAM2112.040, duct static QBM3020-5, duct AQ
+  QPM2100, water temp QAE2120.010, water DPT QBE3000-D16, water DPS PL-FD113, pressure QBE2003-P16, tank
+  hi/lo AX-LS-FL-1HM / -1LM, level AX-UL-SEP380-2, room unit RDF440BN, CT CTD-C3H00-1; dampers
+  [Damper Actuator] [Spring Return], PICV / FCU valve / butterfly to the V.A. selection sheet.
+  No device for duct smoke detectors (by FA) or sprinkler flow switches (by fire fighting).
+  **Column M is the TOTAL for all units** (YALJ, Qiddiya, Ajyad) because FieldDevices counts with
+  `SUMIFS(IOSummary!M:M, IOSummary!O:O, B)` - write it as `=<per unit>*$A<qty row>`.
+- **Change:** 240 device rows; FieldDevices e.g. RDF440BN 3 -> 940 once M multiplied by block qty
+- **Reason:** "field device are included in the drawing ... fill them in io summary but based on the
+  previous project choice"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** no
