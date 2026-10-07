@@ -110,263 +110,316 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
 
 ---
 
-## C. IOSummary (Phase 2)
+## Estimation runs one phase per invocation
+- **Phase:** all   **Date:** 2026-09-28   **Project:** (skill setup)
+- **Rule:** Complete one phase, present it for review, then stop. Never chain two phases in one turn,
+  and never mark a phase DONE without the estimator's approval or an explicit "next".
+- **Change:** skill rewritten from a single end-to-end run -> gated phase-by-phase run
+- **Reason:** "i want the skill like every time i use it it finish one phase per time like first get
+  all equipement i check if i find thing not good i ask"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** whole structure (phase gates, state file)
 
-## Generate with the EquipmentList button, then complete rows 121+
-- **Rule:** `GenerateIOPointsFromEquipmentList` stops at EquipmentList row 120 (`currentRow += 29`).
-  Run the button, then append blocks for rows 121+ with the macro's own steps (IOTemplate A4 = qty,
-  B2 = Type, B4 = name; copy rows 1:30; insert; clear B2, A4:G26, M4:N26). `ClearIOSummary` deletes
-  only A1:A2000 - delete the whole used range first. Check block count == EquipmentList rows.
-- **Source:** Al Moosa 2026-10-01 | GTS standard + my error | scope: always
+## Ask why a correction was made, then scope the rule accordingly
+- **Phase:** all   **Date:** 2026-09-28   **Project:** (skill setup)
+- **Rule:** After applying any substantive correction, ask once whether it came from the spec, GTS
+  standard practice, this client, this project, your error, or a commercial call - and set the recorded
+  rule's `Scope` from that answer. Never generalise an unexplained edit.
+- **Change:** silent recording of corrections -> ask the reason, then record with a reason type
+- **Reason:** "and it ask me if i update why i update and based on my answer update the skill"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** "Self-upgrade: ask WHY, then record"
 
-## Never write raw cells into IOSummary blocks; never retrofit layout
-- **Rule:** Use the block design (macro-built blocks, `InsertIOLine` for extra rows), decide titles /
-  order / blank rows before writing and apply them in the same pass. Retrofitting crashed Excel and
-  dropped names. To change a filled layout: clear and rebuild. On a failed write close WITHOUT saving.
-- **Source:** RAPEH 2026-09-28 | GTS standard + my error | scope: always
+## Self-upgrades are published as pull requests, never pushed to main
+- **Phase:** all   **Date:** 2026-09-28   **Project:** (skill setup)
+- **Rule:** After recording a rule in this file, batch that phase's learned rules onto a
+  `learn/<phase>-<slug>` branch and open a PR against `main` of
+  ahmad592002/BMS-ESTIMATION-SKILL. Never commit to `main` directly and never self-merge - the
+  estimator reviews. The rule applies locally at once; a failed push never blocks the estimation.
+- **Change:** rules saved only to the local skill folder -> local save plus a PR for review
+- **Reason:** "the skills in it update should pull request to the repo"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** "Self-upgrade: ask WHY, then record" -> new subsection
+  "Then publish the change as a pull request"
 
-## H:L are row-relative formulas - rewrite them after any row insert
-- **Rule:** `=IF(C5="","",IF(C5*$A4>0,C5*$A4,""))` - `$A4` drifts when rows are copied. After inserts
-  run `fix_hl.ps1` (points every row at its block's qty row) and verify TOTAL C:G x qty == TOTAL H:L.
-  Never `ClearContents` across H:L.
-- **Source:** Al Moosa 2026-10-01 | my error | scope: always
+<!-- New entries go below this line -->
 
-## Group points by component, name them as drawn, no duplicate names in a block
-- **Rule:** Grey bold title row (`ColorIndex 15`) per COMPONENT (Supply Fan, Exhaust Fan, Dampers,
-  Filters, Coils & Valves, Heat Recovery, Sensors, Pump, Chiller, Breakers & Protection, Power
-  Metering, Status & Alarms, Software Integration); DI, AI, AO, DO, SP inside each; one blank row
-  before TOTAL. Name every point by its component (PANEL / BAG / PRE / HEPA / CARBON filter; SUPPLY /
-  EXHAUST FAN AIR FLOW STATUS; HEAT RECOVERY WHEEL 1 / 2). Two rows with the same name in one block
-  are a defect - make them distinct.
-- **Source:** Al Moosa 2026-10-01 / 10-06 | GTS standard | scope: always | "you should write his type like bag filter prefilter"
+## No DDC panel may exceed 250 points
+- **Phase:** 3 DDC List / 4 DDCSummary   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** Cap every DDC at 250 points - physical (DI+AI+AO+DO) plus software points - and test the
+  cap with the `Options` spare factor applied, not on raw counts. Split the panel rather than exceed
+  it. Report each panel's loading against 250 whenever Phase 3 or 4 is presented.
+- **Change:** panel sizing judged only by module count and enclosure practicality -> explicit 250-point
+  ceiling checked including spare
+- **Reason:** "you should know every ddc should not have more then 250 point"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** Phase 3 - DDC List (panel loading rules)
 
-## Point-row conventions
-- **Rule:** Modulating damper: command + feedback on ONE row (AI + AO) with the actuator device.
-  Solenoid valve = status DI + command DO. Air separator = status DI + common alarm DI. Speed-control
-  AO carries no VFD device.
-- **Source:** Al Moosa 2026-10-02 | GTS standard | scope: always
+## Standardise field devices on parts already used in other GTS projects
+- **Phase:** 2 IOSummary   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** Before pricing, compare every field device against the other BMS_PROJECTS workbooks. A
+  model appearing in only one project is a candidate for substitution by the house-standard part for
+  the same duty. Match by FUNCTION: status/proof points take D.P.S. switches (QBM81-x), measured
+  values take transmitters (QBM3020-x, QBE3000-D16). Never swap where the SOW or physics dictates the
+  part - raise it as a question instead.
+- **Change:** SDA-only devices -> house standard: 28x QBM3020-25 -> QBM81-5 (fan airflow proof),
+  44x QBM3020-10 -> QBM81-10 (filter DP), 5x PL-FD113 -> QBE3000-D16; kept 8x QBM3020-5 for duct
+  static pressure under VFD control
+- **Reason:** "in the filed device in the io summary i think some device are not used in any other
+  project then change them to another thing used if is possible"
+- **Reason type:** (pending - GTS standard or this tender?)
+- **Scope:** always (provisional - confirm)
+- **Also changed in SKILL.md:** no
 
-## FCU and VAV are ALWAYS integration points - 7 SP per unit
-- **Rule:** One "Integration" row, 7 SP, protocol in P; no DI/AI/AO/DO and no hardwired devices.
-  Keeps network panels small (~29 units per panel at 250 incl. 20% spare) and stops TX-I/O pricing.
-  VAV rows also carry the unitary controller + room unit as device rows (Al Moosa: DXR1.M09PLZ-112 +
-  QMX1.M34H - confirm per project). FCU: controller through RoomUnits/FCUs (see F).
-- **Source:** Al Moosa 2026-10-02 | GTS standard | scope: always | "we always take them as integration point"
+## The model column in IOSummary is a VLOOKUP - edit the description, not the model
+- **Phase:** 2 IOSummary   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** Column O is `IFNA(VLOOKUP($N<row>, FieldDevices!A:B, 2, FALSE), ...)`. To change a device,
+  write the exact `FieldDevices!A` description into column N and let O resolve; FieldDevices quantity
+  counts then update themselves. Never overwrite O - it destroys the formula. Changing a point between
+  status and measurement also means moving its 1 between column C (DI) and D (AI); H:L are formulas
+  (`C:G * $A<block>`) and must never be typed.
+- **Change:** n/a - workbook mechanics learned while editing
+- **Reason:** discovered when swapping field devices; writing O directly would have broken the lookup
+- **Reason type:** my error (avoided)
+- **Scope:** always
+- **Also changed in SKILL.md:** no
 
-## Field devices: only where drawn, house-standard models, M = total quantity
-- **Rule:** Device only where the instrument is drawn. Models GTS uses: fan DPS QBM81-5, filter DPS
-  QBM81-10, duct T&RH QFM2120, duct T QAM2112.040, duct static QBM3020-5, duct AQ QPM2100, water temp
-  QAE2120.010, water DPT QBE3000-D16, water DPS PL-FD113 (Sontay - not Siemens, keep it out of the
-  Product Finder), pressure QBE2003-P16, float AX-LS-FL-1HM/-1LM/-2LH, level AX-UL-SEP380-2, room
-  thermostat RDF440BN, room AQ IAQRM5XC (Greystone), CO/NO2 Greystone. No device for duct smoke
-  (by FA) or sprinkler flow switches. Column O is a VLOOKUP on N - write the FieldDevices!A text in N,
-  never type O. Column M = `=<per unit>*$A<qty row>` (FieldDevices sums M). A one-project-only model
-  is a candidate for the house standard for the same duty.
-- **Source:** SDA 2026-09-28, Al Moosa 2026-10-01 | GTS standard | scope: always
+## Write to the workbook via Excel COM, with events disabled
+- **Phase:** all   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** Excel COM is available on this machine. Back the workbook up first, attach to the running
+  instance if the file is already open (`GetActiveObject("Excel.Application")`), set `EnableEvents =
+  $false` so no `Worksheet_Change` macro fires mid-write, edit, `CalculateFullRebuild()`, verify the
+  gate, then Save. Never write these workbooks with a plain XLSX library.
+- **Change:** content handed over as tables to paste -> written directly into the workbook
+- **Reason:** Excel 16.0 present; the workbook was open in a live session during the edit
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** no
 
-## Valves: two priced rows, PICV where the tender says PICV
-- **Rule:** Never leave a valve on a "V.A. Selection Sheet" device (no price). Each valve = command row
-  `[Water] [Valve]` + feedback row `[Water] [Valve Actuator]`, M = 1*qty on both. GTS models
-  (Al Moosa final):
-  | Duty | Valve | Actuator |
-  |---|---|---|
-  | AHU / FAHU / ERU cooling coil (drawings or BOQ say PICV) | VPF44.65F25 | SAX61P03 |
-  | Solenoid / run-around / heat-recovery coil (globe) | VVF42.65-50 | SKB62/F |
-  | Butterfly: HEX, CHW header, isolation (ICV) | VFW41.150 | SQL341E100 |
-  If the drawings or client BOQ say PICV, never price a globe valve for that duty. Models typed in O
-  count only if listed in the Valves sheet direct list (rows 62+, `=SUMIFS(IOSummary!M:M,
-  IOSummary!O:O, A<r>)`) and present in the Pricelist. FCU valves come with the FCU.
-- **Source:** Al Moosa 2026-10-02 -> 10-07 | GTS standard | scope: always | estimator picked the models
+## Drive the workbook's own macros - do not hand-build the generated sheets
+- **Phase:** 4,5,6,7   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** The workbook carries purpose-built VBA for most phases. Run these instead of writing cells:
+  `DDCSummaryModule.GenerateDDCSummary` then `SelectControllersForSheet` (Phase 4);
+  `GenerateFullDDCSummary` (Phase 5); `DamperActuatorSelectionModule.LoadDamperActuators` +
+  `DamperActuatorDefaultSelection`; `VASelectionModule.LoadValves` + `VADefaultSelection`;
+  `VFDSelectionModule.LoadVFDs` + `SelectVFDs`; `WorstationModule.GenerateWorstation`;
+  `BOQModule.StartBOQGeneration`. Save before each macro - some crash Excel (SelectVFDs did), and a
+  saved file loses nothing. `SelectControllers` needs an argument; use `SelectControllersForSheet`.
+  A Load* macro that fails once via COM often succeeds on a retry with the workbook freshly opened.
+- **Change:** hand-building DDCSummary/BOQ -> running the workbook's macros
+- **Reason:** the macros hold GTS's own selection logic; hand-built output would diverge from it
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** no
 
-## Valve / damper sizes are almost never in the tender - say so, don't invent precision
-- **Rule:** Search the drawings (pdftotext: DN, mm, L/s, kW, TR, GPM, m3/h) and the client BOQ before
-  assuming. Al Moosa had none (valves were LS items). Keep one middle size (DN65 coils, DN150
-  butterfly; damper 2.5 m2 default), mark every model yellow "size not in drawings", and list
-  "sizes assumed - to be confirmed" on the Cover Page. Real sizes need the mechanical schedules.
-- **Source:** Al Moosa 2026-10-06 | project condition (recurs) | scope: always | "Keep default 2.5 m²"
+## LoadVFDs defaults every drive to 0.75 kW - fill the real ratings before selecting
+- **Phase:** 6 Ancillaries   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** `LoadVFDs` cannot parse kW from the equipment name, so every row loads as 0.75 kW / 1 HP.
+  Write the true kW and HP into columns D and E from the equipment names or the SOW before running
+  `SelectVFDs`, or every drive is selected one frame size. Check the same defaulting on any Load*
+  macro: damper actuators load at the `Options` default duct size (2.5 m2), and valves at the default
+  AHU valve size, so both need real duct areas / flow data to size correctly.
+- **Change:** 9 VFD rows at 0.75 kW -> 7.5/15/7.5/11/37/30/15/30/45 kW, then selected as G120P
+- **Reason:** discovered when the selection returned one frame size for 11 different drives
+- **Reason type:** my error (caught)
+- **Scope:** always
+- **Also changed in SKILL.md:** no
 
-## Tag every software point's protocol in column P
-- **Rule:** Workstation counts SP with `SUMIF(IOSummary!P:P, <label>, L:L)`; labels exactly `MODBUS`,
-  `BACNET/IP`, `BACNET/MSTP`, `MBUS`, `KNX`. "Other" must read 0.
-- **Source:** SDA 2026-09-28 | GTS standard | scope: always
+## Tag software points with their protocol in IOSummary column P
+- **Phase:** 2 IOSummary / 6 Workstation   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** The Workstation sheet classifies software points with
+  `SUMIF(IOSummary!P:P, <protocol>, IOSummary!L:L)`, where the key must match its own labels exactly:
+  `MODBUS`, `BACNET/IP`, `BACNET/MSTP`, `MBUS`, `KNX`. An untagged SP row falls into "Other", so a
+  whole project can show 0 on every protocol and the licence mix is then unverifiable. Tag every SP
+  row in column P, and check "Other" reads 0 before pricing the workstation.
+- **Change:** 879 SP all in "Other" -> 804 BACNET/MSTP (FCU, zone thermostats, VAV) + 75 BACNET/IP
+  (chillers via Chiller Plant Manager)
+- **Reason:** "you don't say the software point is mode bass or other thing check them"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** no
 
----
+## Every exclusion note must match what the BOQ actually prices
+- **Phase:** 7 Cover Page   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** After any BOQ regeneration, re-read the Cover Page inclusions, exclusions and notes against
+  the BOQ categories. A note that excludes what the BOQ charges for (or promises what it omits) is a
+  contract defect, not a typo. Check the template's carry-over notes especially - they arrive from the
+  previous project and describe its scope, not this one.
+- **Change:** notes excluded damper actuators, valves and VFDs while the BOQ priced all three
+  (26,986 + 105,058 + 117,720); rewritten to match
+- **Reason:** "okay change the note", "see notes and other thing"
+- **Scope:** always
+- **Reason type:** GTS standard
+- **Also changed in SKILL.md:** no
 
-## D. DDC List (Phase 3)
+## Check the Cover Page for template carry-over from the previous project
+- **Phase:** 7 Cover Page   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** Priced option lines survive from project to project. Verify each against the tender before
+  quoting it; an identical figure in another project's workbook is the tell. Delete what this tender
+  does not ask for.
+- **Change:** removed "Total Price for Redundancy server" SAR 52,857.14 (`=37000/0.7`) - absent from
+  all 11 SOW pages and 43 BOQ items, and carrying the identical value in YALJ and RAPEH
+- **Reason:** "the redundancy server needed or is telled in the data ? if not delete it"
+- **Reason type:** spec
+- **Scope:** always
+- **Also changed in SKILL.md:** no
 
-## No DDC over 250 points incl. spare - network rows too
-- **Rule:** Physical + SP, with the Options spare applied, <= 250 for EVERY DDC List row, including
-  "virtual" rows for IP unitary controllers / VRF gateways (else the BOQ shows "Need To Seperate").
-  Split overloaded panels into separate panels `<drawn name>-1`, `-2`... filled floor by floor.
-- **Source:** SDA 2026-09-28, Al Moosa 2026-10-02 | GTS standard (250 cap) | scope: always; the
-  `-1/-2` naming and network-panels-per-floor were Al Moosa choices - confirm on the next project
+## Breakdown Siemens cost comes from the Product Finder, not the BOQ
+- **Phase:** 7 Breakdown   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** `Breakdown!D23` is `=Product_Finder_...!K14`, so it does NOT follow a BOQ regeneration.
+  After adding scope to the BOQ, the Product Finder must be refreshed with the new items or the
+  Breakdown understates cost and overstates margin. No macro does this - it is an estimator step.
+  Always cross-check `BOQ!J112` (total cost) against `Breakdown!I91` before quoting a margin; if they
+  differ, the margin shown is wrong. Never rewire D23 to hide the gap.
+- **Change:** flagged - BOQ cost 513,547.77 vs Breakdown 359,815.51 after valves and VFDs were added
+- **Reason:** found while auditing; margin displayed 54.46% against a materially higher real cost
+- **Reason type:** my error (caught)
+- **Scope:** always
+- **Also changed in SKILL.md:** Phase 7 final audit
 
-## GTS uses PXC, never PLC - every panel is a DDCP
-- **Rule:** Panels drawn as PLC / RIO (chiller plant manager, MV/LV PLC, remote IO) are priced as PXC
-  panels named `DDCP-<bldg>-<level>-<next nn>`; equipment names say "via DDC". Keep a drawn-tag ->
-  DDCP map (`panel_rename.txt`, project data) so `ddc_build.ps1` applies it.
-- **Source:** Al Moosa 2026-10-06 | GTS standard | scope: always | "we use just PXC not PLC"
+## Take project expenses and resource rates from previous projects
+- **Phase:** 7 Breakdown   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** Sections E (General Expenses) and F (Resources) generate nothing - fill them from the
+  nearest comparable project. GTS rates seen so far: accommodation 3,000/month, rental car
+  2,500/month, car fuel 600/month, air ticket 1,200 each, T&C Engineer 13,000 (in all three reference
+  projects), Technician 6,000. Set durations from the contract period and site distance, and say which
+  numbers are rates from history and which are your own judgement.
+- **Change:** E and F all zero -> E 17,000 + F 19,000; project cost 323,816 -> 359,816
+- **Reason:** "i think need to add something like the boq some thing like the the car ticket if needed
+  take price of them from other project"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** no
 
-## DDC List template limits - extend the design past them
-- **Rule:** Formatted only B:DQ x 81 rows; `GenerateEquipmentForDDCList` scans IOSummary to row 3000;
-  `ClearDDCList` clears B:DU; `FillDDCEquipmentInCell` reads 150 columns. Past these, write the list
-  directly (`ddc_build.ps1 -Write`) and extend borders, vertical headers, row-2 fill 14806254, the
-  crosshair CF and the three row-4 Assigned-vs-Total CFs to the last column (`full_chain.ps1` does it).
-  Rebuild CFs with delete + Add (`ModifyAppliesToRange` crashed Excel).
-- **Source:** Al Moosa 2026-10-02 | GTS standard | scope: always | "the design not applicable on all column"
+## Verify BA licence extensions - none below 2000 points, and the macro over-adds
+- **Phase:** 6 Ancillaries (Workstation)   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** `CCA-CMPXL-BA` (compact) already includes 2000 BA points. Test `Total BA * (1 + spare)`:
+  at or below 2000 the BOQ gets **no** `CCA-*-BA` extension line at all; above 2000, deduct the
+  included 2000 and cover the remainder with `CCA-1000-BA` / `CCA-500-BA` / `CCA-100-BA`
+  (`CCA-5000-BA` only on the non-compact route). Always read the parts list after
+  `GenerateWorstation` and delete extensions that are not called for.
+- **Change:** workstation licence accepted as the macro generated it -> extension lines verified
+  against the 2000-point allowance every time
+- **Reason:** "the extention is not needed if the number of point +20% less then 2000 if more we add
+  item 100 point 500 200 1000 extra but the auto somtimes add one not needed" / "no i put nothing in
+  this project because is less then 2000"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** phases/phase6-ancillaries.md - new "BA licence extensions" section
 
----
+## Why SelectBALicenses over-adds (two VBA defects)
+- **Phase:** 6 Ancillaries   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** Two defects in `WorstationModule.SelectBALicenses` make it add unneeded extensions:
+  (1) the deduction is guarded by `If (Compact And TotalBA >= 2000)`, so below 2000 - exactly when the
+  compact licence already covers everything - the 2000 included points are never deducted and the full
+  count falls into the extension ladder; (2) `BA1000 = RemainingBA / 1000` assigns a Double to an
+  Integer, so VBA rounds rather than truncates (1.656 -> 2). Spare IS applied upstream at line 16
+  (`TotalBA = TotalBA * (1 + Spare)`), so the ladder always works on the spared figure.
+- **Change:** n/a - root cause of the over-add, found by reading the VBA
+- **Reason:** traced after the estimator reported "the auto somtimes add one not needed"
+- **Reason type:** my error (avoided)
+- **Scope:** always
+- **Also changed in SKILL.md:** no
 
-## E. DDCSummary / DDCFullSummary (Phases 4-5)
+## After the BOQ, carry every Siemens part into the Product Finder
+- **Phase:** 7 BOQ   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** The Product Finder is the Siemens quotation and its `K14` feeds `Breakdown!D23`, so it must
+  be repopulated from the BOQ after every BOQ generation. Item table starts **row 17**; write only
+  **C = Art.Type** (the BOQ `Model number`) and **E = Qty** - D/F/G/J/K/L are lookups against
+  `Listprice_...` and fill themselves. Siemens parts only. Scan from row 17 for the first empty C
+  (earlier runs leave gaps); never duplicate a code. Through COM the qty must be written as a string.
+  Verify `G13` (line count) equals the distinct Siemens models in the BOQ.
+- **Change:** Product Finder left at 27 controller-era items while the BOQ held 38 Siemens models ->
+  all 38 carried across; K14 433,649 -> 981,127, Siemens cost 216,825 -> 490,564, gross margin
+  57.96% (fiction) -> 19.81% (real)
+- **Reason:** "other then the workspace we generate the boq take all field code to the sheet of
+  product finder and put all siemens product"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** phases/phase7 - new "Product Finder" section
 
-## SelectControllersForSheet works on the ACTIVE sheet
-- **Rule:** Activate `DDCSummary` (or DDCFullSummary) before `SelectControllersForSheet`, then check
-  Controllers!L > 0. Run from another sheet it selects nothing and the BOQ silently has no
-  controllers. (`run_macro.ps1 -Sheet DDCSummary` handles it.)
-- **Source:** Al Moosa 2026-10-02 | my error | scope: always
+## Check the BOQ against the selection sheets - it silently drops lines
+- **Phase:** 7 BOQ   **Date:** 2026-09-28   **Project:** SDA SCITECH Khobar
+- **Rule:** `StartBOQGeneration` does not necessarily carry every selected item. After generating,
+  reconcile the BOQ part by part against `ValvesAndActuators`, `VFDs`, `DamperActuators` and
+  `Workstation` - not by comparing totals.
+- **Change:** found `VXF42.65-50` x2 and `SQL36E65` x3 selected on the valve sheet but absent from the
+  BOQ, therefore unpriced
+- **Reason:** spotted while reconciling Siemens parts into the Product Finder
+- **Reason type:** my error (caught)
+- **Scope:** always
+- **Also changed in SKILL.md:** phases/phase7 - BOQ section
 
----
+## Build IOSummary with the sheet's macros, sort by type, one blank row per block
+- **Phase:** 2 IOSummary   **Date:** 2026-09-28   **Project:** Riyadh Air Premium Hub
+- **Rule:** Never write raw cells into IOSummary - it destroys the block design. Use
+  `ClearIOSummary`, then `AddEquipmentFromEquipmentList(<EquipmentList Qty cell>, <row>)` per
+  equipment, `AddIO` per point, and `InsertIOLine` when a block needs more than the template's 22
+  point rows; insert and fill bottom-up. Then lay the block out: **sort the points by type**
+  (DI, AI, AO, DO, SP) and **leave exactly one blank row** before TOTAL, deleting the rest.
+  When trimming, never `ClearContents` across H:L - those are the `C:G * $A<qty row>` all-systems
+  formulas and wiping them makes every block total zero.
+- **Change:** hand-written cells, source order, ~150 surplus blank rows -> macro-built formatted
+  blocks, points grouped by type, one spare row each (sheet 691 -> 544 rows)
+- **Reason:** "you break the designe of the iosummary you need to just full it not break designe" /
+  "delete the free row and keep one in every box like pump box one space and seperate io point by
+  types"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** phases/phase2 - two new sections
 
-## F. Ancillaries (Phase 6)
+## A duty/standby set with package tags is one equipment row, not one per pump
+- **Phase:** 1 EquipmentList / 2 IOSummary   **Date:** 2026-09-28   **Project:** Riyadh Air Premium Hub
+- **Rule:** Where the IO list carries a set-level tag alongside the individual units (`BSP-01`,
+  `BSP-02`, `BSP-SET-01`), enter **one row at qty 1** covering the whole assembly and put all its
+  points in that block. Entering qty 2 multiplies the shared package points.
+- **Change:** booster / circulation / submersible pumps at qty 2 -> qty 1 "... Set"; Total BA
+  591 -> 556
+- **Reason:** caught when IOSummary totals exceeded the IO list's own count by exactly the set points
+- **Reason type:** my error (caught)
+- **Scope:** always
+- **Also changed in SKILL.md:** phases/phase2 - "Lay the block out cleanly"
 
-## Every Load* macro loads defaults - fix them before selecting
-- **Rule:** `LoadVFDs` sets every drive to 0.75 kW / 1 HP - write real kW/HP first. Dampers load at
-  the Options duct area (2.5 m2) and valves at the Options size - replace with real data when it
-  exists, otherwise keep the default and declare it.
-- **Source:** SDA 2026-09-28 | my error | scope: always
+## Group titles inside each IOSummary block
+- **Phase:** 2 IOSummary   **Date:** 2026-09-28   **Project:** Riyadh Air Premium Hub
+- **Rule:** Above each point group put a small shaded title row - "Digital Inputs", "Analog Inputs",
+  "Analog Outputs", "Digital Outputs", "Software Points" - using `Interior.ColorIndex = 15` (the
+  workbook's own `IsTitle` style). Title rows carry no IO value and no H:L formula.
+- **Change:** sorted points with no headings -> 34 title rows across 23 blocks
+- **Reason:** "not jyst like that en + add small title to every group"
+- **Reason type:** GTS standard
+- **Scope:** always
+- **Also changed in SKILL.md:** phases/phase2 - "Lay the block out cleanly"
 
-## BA licence: no extension at or below 2000 points incl. spare
-- **Rule:** `CCA-CMPXL-BA` includes 2000 BA points. `Total BA * (1 + spare)` <= 2000 -> no `CCA-*-BA`
-  line; above -> deduct 2000 and ladder 1000/500/100. `SelectBALicenses` over-adds (deduction guarded
-  by `>= 2000`; Integer rounding) - read and correct its output every time.
-- **Source:** SDA 2026-09-28 | GTS standard | scope: always
+## Build the IOSummary layout in the fill pass, never retrofit into filled blocks
+- **Phase:** 2 IOSummary   **Date:** 2026-09-28   **Project:** Riyadh Air Premium Hub
+- **Rule:** Decide titles, sort order and blank rows before writing, and apply them in the same pass
+  that fills each block. Retrofitting layout into populated blocks fails: repeated `InsertIOLine`
+  calls crashed Excel into AutoRecover (file reopened as `.xlsb`); a batched `Rows.Insert` plus
+  clear-and-rewrite dropped point names and left BA at 554 instead of 556. To change the layout of a
+  filled sheet, `ClearIOSummary` and rebuild. Save after every good state; on a failed write close
+  **without saving** and reopen from disk rather than repairing a half-written sheet.
+- **Change:** three failed retrofit attempts -> clean rebuild with titles written during the fill
+- **Reason:** observed across three consecutive failures in one session
+- **Reason type:** my error (caught)
+- **Scope:** always
+- **Also changed in SKILL.md:** phases/phase2 - new section
 
-## Workstation hardware follows the client BOQ head-end lines
-- **Rule:** The template macro sets licences only; PCs, monitors, printers, UPS default to 1 and there
-  is no console / wall display. Take the client BOQ quantities (higher-number rule) - Al Moosa: 8
-  workstations (Clients B28 = 8), 2 laser + 2 dot-matrix printer sets, 2 consoles, 2 wall displays
-  (macro extended to read Workstation!B36:B39). Consoles / wall displays priced 0 on purpose need a
-  Pricelist row at UP 0 (see G).
-- **Source:** Al Moosa 2026-10-05 | GTS standard | scope: always | "I PUT ONLY 8 WORKSTATION AND I FORGET LASER"
-
-## FCU controllers through RoomUnits/FCUs - never a hand-typed model
-- **Rule:** FCU device = `[FCU Controller]`; set Options B13 to the real protocol; `LoadRoomUnits`,
-  choose the controller from the dropdown. The FCUs sheet prices controllers only. Never price two
-  controllers on one FCU (RDF440BN is complete; DXR2 needs a QMX3). Al Moosa: RDF440BN alone, with a
-  Cover Page note that it replaces the BOQ's "IP unitary controller".
-- **Source:** Al Moosa 2026-10-05 | GTS standard (path) / this project (RDF440BN) | scope: always (path)
-
-## One head-end server for the whole campus unless the tender says otherwise
-- **Rule:** Read the client BOQ and risers for the server line. Al Moosa: ONE fault-tolerant
-  rack-mounted server (ATC BOQ item, qty 1) for all 3 buildings; MAB workstations are "remote users
-  of the servers located in ATC"; EEC has none. "Fault tolerant" = one machine with redundant
-  internals, not two servers. Price it separately on the Cover Page (cost / 0.6). If the tender has
-  no server line, delete the template's carried-over server line (SDA).
-- **Source:** SDA 2026-09-28 (deleted), Al Moosa 2026-10-07 (kept 1) | spec | scope: always
-
----
-
-## G. BOQ, Product Finder, Breakdown, Cover Page (Phase 7)
-
-## How a Siemens price is built - three different numbers
-- **Rule:** Know which price you are looking at before answering "why is it different":
-  - `Pricelist` UP (feeds BOQ cost K) = NET price, about list x 45% (55% off), no customs.
-  - Product Finder K (unit) = list x (1 - G11) x (1 + customs 8%) + freight -> K14 total.
-  - Breakdown B.1 = Product Finder K14 x (1 - E23 Siemens discount 55%) = the cost used for margin.
-  - BOQ selling = Pricelist UP / (1 - margin 40%).
-  So BOQ Siemens cost and Breakdown B.1 differ by about the customs (~6-8%) - that is normal.
-  Example SAX61P03: list 1,994.06; PF 2,153.58; real cost 969.11; Pricelist 902.50; selling 1,504.
-- **Source:** Al Moosa 2026-10-07 | GTS standard | scope: always
-
-## Product Finder discount G11 stays 0 - discount once, in the Breakdown
-- **Rule:** With G11 = 50/55 AND Breakdown E23 = 55%, Siemens material is discounted twice and the
-  margin shows ~53-56% instead of ~28%. Keep G11 empty/0; E23 holds the discount. Check G11 in every
-  audit.
-- **Source:** Al Moosa 2026-10-07 | my error (caught twice) | scope: always
-
-## Refill the Product Finder after every BOQ change
-- **Rule:** Breakdown D23 = Product Finder K14, which does NOT follow the BOQ. After any BOQ change run
-  `pf_refill.ps1` (C17 part no + E17 qty for every Siemens BOQ line; D/F/G/J/K/L are lookups), then
-  confirm PF lines == BOQ Siemens lines part by part and no #N/A in D.
-- **Source:** SDA 2026-09-28, Al Moosa 2026-10-07 | GTS standard | scope: always
-
-## Every BOQ cost cell is a Pricelist VLOOKUP
-- **Rule:** BOQ K = `=VLOOKUP($D<r>,Pricelist!$A$2:$E$1000,3,FALSE)`, E/G/H the same lookup on
-  columns 2/5/4. A Product Finder formula pasted into K refers back to its own row and loops (wrong
-  cost, wrong selling). New models need a Pricelist row (net price, manufacturer) first. Items priced
-  0 on purpose (operator console, wall display) need a Pricelist row at UP 0 / "Others", or the next
-  `StartBOQGeneration` shows #N/A.
-- **Source:** Al Moosa 2026-10-06 / 10-07 | my error (caught) | scope: always
-
-## Reconcile the BOQ part by part against its sources
-- **Rule:** `StartBOQGeneration` can drop selected items. After generating, compare every BOQ line's
-  qty with Controllers!L, FieldDevices C, Valves direct list, DamperActuators, Enclosures and
-  Workstation (`audit.ps1` / the cross-check in `revision_facts.ps1`), and selling = cost x qty / 0.6.
-- **Source:** SDA 2026-09-28 | my error | scope: always
-
-## Breakdown expenses and resources from GTS history
-- **Rule:** Sections E/F generate nothing. Rates (SAR/month): per diem 3,000 and accommodation 3,000
-  per person; rental car 2,500; fuel 600; air ticket 1,200 each; T&C engineer 13,000; design engineer
-  15,000; supervisor 7,000; technician 6,000; draftsman 6,000; contingency 1.5%. The DURATION is the
-  estimator's call - ask (Al Moosa: 10 months site, edited by hand). Never change the Siemens discount
-  (E23) yourself - commercial.
-- **Source:** SDA 2026-09-28, Al Moosa 2026-10-06 | GTS standard (rates) | scope: always
-
-## Cover Page: notes must match the BOQ; carry-over lines removed
-- **Rule:** Re-read every note after each BOQ regeneration: nothing excluded that the BOQ prices, no
-  template text from the last project. Ref `BMS-R00-<Mon><Year>`, Company = client. Standard notes
-  for this kind of tender: valve sizes assumed; meters by others, integration included; IO estimated
-  where no schematic; higher of riser/BOQ taken; BOQ items not on risers and how they are covered.
-  Price lines kept separate when asked (server; Al Moosa also split valves & actuators onto its own
-  line). Payment / warranty / SOW wording is the estimator's.
-- **Source:** SDA 2026-09-28, Al Moosa 2026-10-06 | GTS standard | scope: always
-
----
-
-## H. Excel / PowerShell automation
-
-## Excel COM only, events off, back up first
-- **Rule:** Never write these workbooks with an XLSX library. Back up, attach, `EnableEvents = $false`,
-  edit, recalc, verify, Save. Save before every macro (some crash Excel).
-- **Source:** SDA 2026-09-28 | GTS standard | scope: always
-
-## Drive the workbook's macros instead of hand-building generated sheets
-- **Rule:** GenerateDDCSummary -> SelectControllersForSheet; GenerateFullDDCSummary;
-  GenerateWorstation; LoadDamperActuators + DamperActuatorDefaultSelection; LoadValves (+
-  VADefaultSelection); LoadVFDs + SelectVFDs; LoadRoomUnits; StartBOQGeneration. Run through
-  `run_macro.ps1` (save before/after, waits for Ready, retries 0x800A9C68 once). Only parameterless
-  macros via `$x.Run` - argument macros raise a VBA debug dialog.
-- **Source:** SDA 2026-09-28, Al Moosa 2026-10-06 | GTS standard | scope: always
-
-## Any upstream edit -> regenerate everything downstream, in order
-- **Rule:** DDC List -> GenerateDDCSummary -> SelectControllersForSheet -> GenerateFullDDCSummary ->
-  GenerateWorstation -> dampers -> valves -> VFDs / RoomUnits -> StartBOQGeneration -> pf_refill ->
-  Breakdown / Cover recalc -> audit (`full_chain.ps1`). Never quote a price while any step is older
-  than the last upstream edit. A point-NAME-only change needs just GenerateFullDDCSummary.
-- **Source:** Al Moosa 2026-10-02 | GTS standard | scope: always
-
-## Open Excel with Start-Process; macros act on the ACTIVE workbook
-- **Rule:** If Excel is closed, `Start-Process <file.xlsm>` and wait until `GetActiveObject` lists it.
-  `BindToMoniker(path)` on a closed file starts a hidden instance that dies with the script ("RPC
-  server unavailable" next call). Template VBA uses unqualified `Sheets()` = ActiveWorkbook: activate
-  the workbook (and sheet) before every macro and verify `ActiveWorkbook.FullName`; keep only one
-  estimation workbook open while macros run (a chain once regenerated the wrong file).
-- **Source:** Al Moosa 2026-10-06 | my error | scope: always
-
-## When Excel stops answering
-- **Rule:** "Call was rejected by callee", "Unable to set Calculation", or `Workbooks.Count = 0` on a
-  visible window = a cell is in edit mode or a dialog is open: ask the user to press Enter/Esc, don't
-  loop. Wrap `$x.Calculation` changes in try/finally. A workbook window can be hidden
-  (`Windows(1).Visible = $true`). For a read-only check while the live window is busy, open the SAVED
-  file in a separate `New-Object Excel.Application` with `AutomationSecurity = 3`, ReadOnly.
-- **Source:** Al Moosa 2026-10-06 / 10-07 | my error | scope: always
-
-## PowerShell traps that already cost real damage
-- **Rule:**
-  - Variable names are case-insensitive: `$K`/`$k`, `$V`/`$v`, `$bq`/`$BQ`, `$yel`/`$YEL` are ONE
-    variable (hit again 2026-10-07). Use distinct names.
-  - `[ordered]@{228='x'}` indexed with an int returns by POSITION -> null -> blank cells written (20
-    point names blanked, 2026-10-06). Use arrays of pairs or string keys; refuse to write empty values.
-  - `$host` is reserved; `cat` is Get-Content; index as `$v[($r+2),2]`, not `$v[$r+2,2]`; `"$r:"`
-    needs `"${r}:"`; `{0,>10}` is invalid; cast every value written to a cell (`[string]`/`[double]`).
-- **Source:** Al Moosa 2026-10-01..07 | my error | scope: always
+## Equipment quantities come from the drawings when the client BOQ has no equipment count
+- **Phase:** 1 EquipmentList   **Date:** 2026-10-01   **Project:** Al Moosa University
+- **Rule:** Build the EquipmentList from the drawings (BMS risers / schematics / schedules) - the client
+  BOQ often prices only controllers, field devices and LS items and carries no count for chillers, AHUs,
+  fans, pumps or boards. Where the BOQ does quantify a line that the drawing also counts (e.g. FCU / VAV
+  unitary controllers), follow the drawing in the EquipmentList, note the BOQ figure in the row text, and
+  re-check it in Phase 2. Also build a per-tag takeoff workbook (tag -> DDC/RIO/PLC -> room) when the
+  estimator wants to see "every equipment and where it connects".
+- **Change:** MAB FCU 348 -> 139 and VAV 449 -> 691 (BOQ -> drawing); chillers 3 -> 5; +3 refrigerant
+  detectors; per-tag takeoff workbook produced
+- **Reason:** "in the boq no count see it if you want"
+- **Reason type:** project condition
+- **Scope:** this project
+- **Also changed in SKILL.md:** no
