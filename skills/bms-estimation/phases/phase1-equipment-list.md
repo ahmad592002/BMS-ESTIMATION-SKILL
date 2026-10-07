@@ -8,8 +8,12 @@ embedded in the BOQ by Phase 7.
 ## Rules
 
 - **One row per equipment family, not per tag.** `Exhaust Fan` qty 23, not EF-01…EF-23.
+- **`Qty` = physical equipment items, never point carriers.** Each pump in a set, each fan in a tag
+  range (`01~18` = 18), each DB / MDB board counts 1. Circuits, breakers and per-set points are
+  POINTS in the IOSummary block, not quantity. Different duties (exhaust vs fresh air) = separate
+  rows. A tag repeated inside its own range is a duplicate - drop it (LEARNED B).
 - **`Qty` from the schedule/drawings**, verified against two sources where possible. When two sources
-  disagree (riser vs client BOQ, duplicates), **take the higher number**, yellow the qty with both
+  disagree (riser vs client BOQ), **take the higher number**, yellow the qty with both
   figures, and add the Cover Page note (LEARNED B - GTS standing rule).
 - **`Function` is exactly `Monitor` or `Monitor&Control`.** Monitoring-only equipment gets status and
   alarm DIs and no outputs - this one word decides the IO count.

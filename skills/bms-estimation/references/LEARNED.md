@@ -88,6 +88,18 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
 - **Source:** Al Moosa 2026-10-05 | GTS standard (confirmed as standing rule) | scope: always |
   "take the highest number always" - e.g. MAB FCU 139 -> 348 (BOQ), VAV kept 691 (riser)
 
+## EquipmentList qty = physical equipment items - never sets, groups, circuits or breakers
+- **Rule:** Count every tagged physical item: `EAF-B1-GF-01~18` = 18 fans; `SP-B1-B02-01~02` = 2
+  pumps (not 1 set); `DBWP-01~03` = 3 pumps; a lighting DB = 1 (its circuits are points, not qty);
+  an MDB / EMDB = 1 board (its breakers are points). Different duties are different rows (car park
+  exhaust PEAF vs fresh air PFAF). A tag repeated inside its own range (`EAF-B1-GF-11` inside
+  `01~18`) is a duplicate - do NOT add it (the higher-number rule is for two sources disagreeing,
+  not for a tag listed twice). Then rewrite the IOSummary per-unit points so the totals still equal
+  the IO list (points per pump, circuits per DB, breakers per board).
+- **Source:** Rehab Oasis 2026-10-07 | GTS standard | scope: always | "is the way to count everywhere" |
+  "B1-GF-01-18 i think this are 18 equ"; estimator set SP 30, DBWP 9, IRRP 4, FIP 6, RCP 10,
+  lighting DB 22, MDB 3, EAF 36, PEAF 12 + PFAF 12
+
 ## Equipment comes from the drawings when the client BOQ has no equipment counts
 - **Rule:** Client BOQs often price only controllers, devices and LS items. Build the EquipmentList
   from the BMS risers / schematics (per-tag takeoff workbook: tag -> panel -> room -> interface), then
