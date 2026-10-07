@@ -1,0 +1,245 @@
+# TEMPLATE <key> | <source note>
+# point lines: label|DI|AI|AO|DO|SP|device(FieldDevices A)|devQty|comment(P)
+# "@SHEET:nnn[:group-prefix]" pulls every matched point of that sheet from points_all.csv
+TEMPLATE CHILLER | estimator block (sheet 001)
+HOA status(Auto Pos.)|1|0|0|0|0|||
+HOA status(Manual Pos.)|1|0|0|0|0|||
+Chiller Start/Stop Command|0|0|0|1|0|||
+Chiller Trip Alarm|1|0|0|0|0|||
+Chiller Status|1|0|0|0|0|||
+Chiller Software Integration|0|0|0|0|15|||MODBUS
+TEMPLATE CT | sheet 022 per tower
+Basin sweeper status|1|0|0|0|0|||
+Basin sweeper alarm|1|0|0|0|0|||
+Fan HOA status (Auto Pos.)|1|0|0|0|0|||
+Fan HOA status (Manual Pos.)|1|0|0|0|0|||
+Fan trip alarm|1|0|0|0|0|||
+Fan status|1|0|0|0|0|||
+Vibration detector status|1|0|0|0|0|||
+Fan speed feedback|0|1|0|0|0|||
+Fan speed control|0|0|1|0|0|||
+Fan start/stop command|0|0|0|1|0|||
+VFD software integration|0|0|0|0|1|||MODBUS
+TEMPLATE PUMP_VFD | sheet 022 per pump
+HOA status (Auto Pos.)|1|0|0|0|0|||
+HOA status (Manual Pos.)|1|0|0|0|0|||
+Pump trip alarm|1|0|0|0|0|||
+Pump status|1|0|0|0|0|||
+Pump run status|1|0|0|0|0|||
+Pump speed feedback|0|1|0|0|0|||
+Pump speed control|0|0|1|0|0|||
+Pump start/stop command|0|0|0|1|0|||
+VFD software integration|0|0|0|0|1|||MODBUS
+TEMPLATE PUMP_CS | sheet 022 CT make-up pump (constant speed)
+HOA status (Auto Pos.)|1|0|0|0|0|||
+HOA status (Manual Pos.)|1|0|0|0|0|||
+Pump trip alarm|1|0|0|0|0|||
+Pump status|1|0|0|0|0|||
+Pump run status|1|0|0|0|0|||
+Pump start/stop command|0|0|0|1|0|||
+TEMPLATE CHW_HEADER | sheet 022 CT typical + plant header (001)
+Motorized isolation / make-up valves open/close status|7|0|0|0|0|||sheet 022
+Condensing water inlet / outlet / make-up temperature|0|4|0|0|0|[Water] [Temperature] [Immersion]|4|sheet 022
+CHW supply / return header temperature|0|2|0|0|0|[Water] [Temperature] [Immersion]|2|sheet 001 - assumed, confirm
+CHW header differential pressure|0|1|0|0|0|[Water] [Differential pressure Transmitter]|1|sheet 001 - assumed, confirm
+Motorized isolation / make-up valves open/close command|0|0|0|5|0|||sheet 022
+TEMPLATE HEX | plate heat exchanger
+Primary inlet / outlet water temperature|0|2|0|0|0|[Water] [Temperature] [Immersion]|2|assumed - no dedicated schedule
+Secondary inlet / outlet water temperature|0|2|0|0|0|[Water] [Temperature] [Immersion]|2|assumed - no dedicated schedule
+TEMPLATE STATUS_ALARM | packaged equipment hardwired interface
+Status|1|0|0|0|0|||
+Common alarm|1|0|0|0|0|||
+TEMPLATE STATUS_ALARM_SP10 | packaged equipment with software integration
+Status|1|0|0|0|0|||
+Common alarm|1|0|0|0|0|||
+Software integration|0|0|0|0|10|||MODBUS - SP count assumed, confirm
+TEMPLATE NO_POINTS | no BMS points shown
+No BMS points shown on schematics|0|0|0|0|0|||confirm if monitoring required
+TEMPLATE RLD | sheet 018
+Purging fan start/stop status|1|0|0|0|0|||
+Purging fan normal/fault status|1|0|0|0|0|||
+Purging fan H/O/A status|1|0|0|0|0|||
+Leak detection panel software interface|0|0|0|0|1|||BACNET/IP
+TEMPLATE REF_DETECTOR | refrigerant detector on RLD panel
+Refrigerant gas level (via RLD panel)|0|0|0|0|1|||BACNET/IP
+TEMPLATE ERU_VRF | sheet 006
+@SHEET:006
+TEMPLATE ERU_CHW | sheet 007
+@SHEET:007
+TEMPLATE ERU_TW | sheet 008
+@SHEET:008
+TEMPLATE AHU_HEATER | sheet 024
+@SHEET:024
+TEMPLATE AHU_CHW | sheet 025
+@SHEET:025
+TEMPLATE AHU_VRF | sheet 026
+@SHEET:026
+TEMPLATE AHU_VAV | sheet 049
+@SHEET:049
+TEMPLATE MAHU_1 | sheet 012
+@SHEET:012
+TEMPLATE MAHU_2 | sheet 053
+@SHEET:053
+TEMPLATE ECU | sheet 005
+@SHEET:005
+TEMPLATE FCU | sheet 011
+@SHEET:011
+TEMPLATE VAV | sheet 044 table 1 (cooling only)
+@SHEET:044:T1
+TEMPLATE EF | sheet 045 exhaust fan
+@SHEET:045:T1 EXHAUST FANS
+TEMPLATE SMOKE_FAN | smoke fan - monitoring only (start by fire alarm)
+Fan status|1|0|0|0|0|||
+Fan trip status|1|0|0|0|0|||
+Fan HOA status (Auto Pos.)|1|0|0|0|0|||
+Fan HOA status (Manual Pos.)|1|0|0|0|0|||
+Air flow status via differential pressure switch|1|0|0|0|0|[Fan] [D.P.S.] [50-500 Pa] [IP54]|1|sheet 004 smoke fan pattern
+TEMPLATE MD | sheet 045 motorized damper
+@SHEET:045:T1 MOTORIZED DAMPER
+TEMPLATE AIR_CURTAIN | sheet 027
+Air curtain status|1|0|0|0|0|||
+Air curtain alarm|1|0|0|0|0|||
+TEMPLATE SLIDING_DOOR | sheet 027
+Door status|1|0|0|0|0|||
+Door alarm|1|0|0|0|0|||
+Door opened status|1|0|0|0|0|||
+TEMPLATE AQ | sheet 028 multi-parameter sensor
+CO2, PM2.5, PM10, ozone, TVOC, CO, NO2|0|0|0|0|7|||MODBUS
+TEMPLATE CO2 | sheet 028
+Carbon dioxide level|0|0|0|0|1|||MODBUS
+TEMPLATE CONO2 | sheet 029
+Carbon monoxide and nitrogen dioxide levels|0|0|0|0|2|[OUTDOOR] [CO] [NO2] [TEM] [0-500 PPM]|1|MODBUS
+TEMPLATE PUMP_SUMP | sheet 041 per pump (pit levels on duty pump)
+Pump status|1|0|0|0|0|||
+Pump trip alarm|1|0|0|0|0|||
+Pump HOA (Auto Pos.)|1|0|0|0|0|||
+Pump HOA (Manual Pos.)|1|0|0|0|0|||
+Pit high level alarm|1|0|0|0|0|[Water] [Level Float Switch] [Hi level alarm-76mm]|1|sheet 041 levels per pit
+TEMPLATE BOOSTER | sheet 048 booster pump set
+@SHEET:048:T1 BOOSTER PUMPS
+TEMPLATE CIRC_PUMP | sheet 048 circulating pump
+@SHEET:048:T1 CIRCULATING PUMPS
+TEMPLATE POOL_PUMP | sheet 042 per pump
+Pump status|1|0|0|0|0|||
+Pump alarm|1|0|0|0|0|||
+Pump status (Manual Pos.)|1|0|0|0|0|||
+Pump status (Auto Pos.)|1|0|0|0|0|||
+Pump command|0|0|0|1|0|||
+TEMPLATE DOSING_AO | sheet 042 chemical dosing unit
+Chemical dosing modulating command|0|0|1|0|0|||
+TEMPLATE FILTER | sheet 042 / 048 filters
+Filter differential pressure status|1|0|0|0|0|[Water] [Differential pressure Switch]|1|
+TEMPLATE TANK | tank levels (client BOQ has level switches + transmitters)
+High level alarm|1|0|0|0|0|[Water] [Level Float Switch] [Hi & Low level alarm-170mm]|1|
+Low level alarm|1|0|0|0|0|||same float switch
+Tank level|0|1|0|0|0|[Water] [Ultrasonic Level Sensor] [0.25 m to 6 m tank]|1|
+TEMPLATE WATER_HEATER | sheet 030
+@SHEET:030
+TEMPLATE FIRE_PUMP | sheet 048 table 2
+@SHEET:048:T2
+TEMPLATE IRRIGATION | sheet 036
+@SHEET:036
+TEMPLATE FUEL_TANK | sheet 034
+@SHEET:034:T1 FUEL TANK
+@SHEET:034:T1 TANKER FILLING POINT
+@SHEET:034:T1 SOLENOID
+@SHEET:034:T1 SOFTWARE
+TEMPLATE FLDP | sheet 034 fuel leak
+@SHEET:034:T1 FUEL LEAK
+TEMPLATE WLDP | sheet 021 table 1
+@SHEET:021:T1
+TEMPLATE LIFT_PIT | sheet 021 table 3
+@SHEET:021:T3
+TEMPLATE FM200 | sheet 004 table 1
+@SHEET:004:T1
+TEMPLATE FOAM | sheet 004 table 2
+@SHEET:004:T2
+TEMPLATE FCS | sheet 048 flow control station
+Flow control station valve status|1|0|0|0|0|||
+Flow control station flow switch|1|0|0|0|0|||
+TEMPLATE LIFT | sheet 019 per lift
+@SHEET:019
+TEMPLATE VT_SYSTEM | sheet 003 table 1
+@SHEET:003:T1
+TEMPLATE CBS | sheet 003 table 2
+@SHEET:003:T2
+TEMPLATE FA | sheet 033
+@SHEET:033
+TEMPLATE UPS | sheet 043
+@SHEET:043
+TEMPLATE MDB | sheet 031 MDB
+Incomer breakers status|1|0|0|0|0|||
+Incomer breakers trip status|1|0|0|0|0|||
+Incomer breakers withdrawn status|1|0|0|0|0|||
+Outgoing breakers status|1|0|0|0|0|||
+Outgoing breakers trip status|1|0|0|0|0|||
+Outgoing breakers withdrawn status|1|0|0|0|0|||
+SPD status|1|0|0|0|0|||
+Over current protection|1|0|0|0|0|||
+Ground fault protection|1|0|0|0|0|||
+Short circuit protection|1|0|0|0|0|||
+ELR with A/V alarm status|1|0|0|0|0|||
+ELR with A/V alarm tripped alarm|1|0|0|0|0|||
+TEMPLATE SMDB | sheet 031 SMDB / ESMDB / USMDB / EMDP / MCC
+Incomer breaker status|1|0|0|0|0|||
+Incomer breaker trip alarm|1|0|0|0|0|||
+All outgoing breakers status|1|0|0|0|0|||
+All outgoing breakers trip alarm|1|0|0|0|0|||
+ELR with A/V alarm status|1|0|0|0|0|||
+ELR with A/V alarm tripped alarm|1|0|0|0|0|||
+TEMPLATE DB | sheet 031 DB / EDB / UDB
+Incomer breaker status|1|0|0|0|0|||
+Incomer breaker trip alarm|1|0|0|0|0|||
+TEMPLATE TAPOFF | sheet 031 tap-off / feeder pillar
+Breaker status|1|0|0|0|0|||
+Breaker trip alarm|1|0|0|0|0|||
+TEMPLATE ATS | sheet 031 ATS
+Normal power breaker status|1|0|0|0|0|||
+Normal power breaker trip alarm|1|0|0|0|0|||
+Emergency power breaker status|1|0|0|0|0|||
+Emergency power breaker trip alarm|1|0|0|0|0|||
+Outgoing breaker status|1|0|0|0|0|||
+Outgoing breaker trip alarm|1|0|0|0|0|||
+TEMPLATE CAPBANK | sheet 031 capacitor bank
+Capacitor bank status|1|0|0|0|0|||
+Capacitor bank alarm|1|0|0|0|0|||
+TEMPLATE SMART_METER | sheet 032 table 2 per meter
+@SHEET:032:T2
+TEMPLATE MV | sheet 038 (via PLC)
+@SHEET:038:T1
+TEMPLATE TRANSFORMER | sheet 038 transformer points
+Oil temperature|1|0|0|0|0|||
+Oil level|1|0|0|0|0|||
+Winding temperature|1|0|0|0|0|||
+Buchholz relay status|1|0|0|0|0|||
+Tap changer position|1|0|0|0|0|||
+TEMPLATE GENERATOR | no schedule - typical
+Generator running status|1|0|0|0|0|||assumed - generator room sheet 035 has no schedule
+Generator common alarm|1|0|0|0|0|||assumed
+Generator software integration|0|0|0|0|20|||MODBUS - SP count assumed, confirm
+TEMPLATE WATER_METER | sheet 039
+Water meter reading|0|0|0|0|1|||MBUS
+High consumption alarm|0|0|0|0|1|||MBUS
+TEMPLATE LCS | lighting control system interface
+Lighting control system software integration|0|0|0|0|20|||BACNET/IP - SP count assumed, confirm
+TEMPLATE ELV | ELV system interface
+ELV system software integration|0|0|0|0|10|||BACNET/IP - SP count assumed, confirm
+TEMPLATE BLINDS | window blinds interface
+Window blinds software integration|0|0|0|0|10|||MODBUS - SP count assumed, confirm
+TEMPLATE VRF_ODU | VRF outdoor unit via VRF gateway
+VRF outdoor unit software integration|0|0|0|0|10|||BACNET/IP - SP count assumed, confirm
+TEMPLATE LAB_INTERFACE | lab equipment group via RS-485
+Lab equipment software integration|0|0|0|0|10|||MODBUS - SP count assumed, confirm
+TEMPLATE FREEZER | sheet 014
+Freezer status|1|0|0|0|0|||
+Freezer alarm|1|0|0|0|0|||
+Freezer temperature (input or software integration)|0|1|0|0|0|||
+TEMPLATE DOOR_CONTACT | door contact (by security supplier)
+Door contact status|1|0|0|0|0|||
+TEMPLATE GREASE | grease interceptor
+High level alarm|1|0|0|0|0|||assumed
+TEMPLATE VALVE_2POS | sheet 022 2-position valve
+Valve open/close statuses|2|0|0|0|0|||
+Valve open/close command|0|0|0|1|0|||
+TEMPLATE ETFE | sheet 009
+@SHEET:009

@@ -11,12 +11,15 @@ and the `Options` sheet filled and approved.
 2. **Read the SOW and spec** for: scope boundary, protocol, brand restrictions, spare requirement,
    integration list, workstation/server requirement, warranty and T&C obligations.
    - **Read the client's own جدول الكميات (bill of quantities) line by line.** It fixes quantities you
-     would otherwise estimate - panel count, sensor counts, valve sizes, VFD ratings, workstation PCs.
-     Every later phase should reconcile against it.
+     would otherwise estimate - panel count, sensor counts, valve sizes, VFD ratings, workstation PCs,
+     server (one per campus or per building?), consoles, printers, wall displays. Record every line in
+     the state file; every later phase reconciles against it (higher number wins - LEARNED B).
    - Search the PDF text for scope words before assuming something is included:
      `pdftotext -enc UTF-8 "<sow>.pdf" - | grep -inE "server|workstation|MDB|generator|UPS|meter"`
 3. **Copy the newest master** from `~/OneDrive/Desktop/GTS/BMS_PROJECTS/BMS Template 2026 V03.xlsm`
-   into the project folder as `<Project> - GTS offer.xlsm`. **Never edit the master in place.**
+   into the project folder as `<Project>-BMS ESTIMATION.xlsm`. **Never edit the master in place.**
+   Set `$env:BMS_WB` to its full path - every script in `scripts/` reads it. If the estimator later
+   renames the file, follow their name; never rename or move it yourself.
    - **V27.1** = `Product_Finder_SI_B_AUT_V27.1` + `Listprice_V27.1_AUT_A_SP` (default).
    - **V26.2** = `Product_FinderV26.2` + `Listprice_V26.2_HVAC_A_SP` (only if the client locked it).
 4. **Set `Options` first** - every hidden lookup sheet reads from it, so changing it later re-selects

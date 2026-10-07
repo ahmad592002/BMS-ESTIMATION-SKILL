@@ -9,7 +9,9 @@ DDCSummaryModule.GenerateDDCSummary      then
 DDCSummaryModule.SelectControllersForSheet
 ```
 
-`SelectControllers` takes an argument and will fail from COM - use `SelectControllersForSheet`.
+`SelectControllers` takes an argument and will fail from COM - use `SelectControllersForSheet`,
+with **DDCSummary active** (it reads `ActiveSheet`): `run_macro.ps1 -Macros ... -Sheet DDCSummary`.
+Then check Controllers!L > 0 - otherwise the BOQ silently has no controllers.
 Save before each macro. See `references/workbook-mechanics.md`.
 
 ## Block layout

@@ -28,7 +28,9 @@ This is the biggest trap in the phase:
 
 - **Workstation** - physical points (DI/AI/AO/DO) plus software points by protocol roll up to
   `Total BA`, which sizes the server/licence: `CMD.06`, `CCA-CMPXL-BA`, workstation PC, 27" monitor,
-  printers, UPS. Re-check the licence tier after any IO change. If "Other" is non-zero, go back to
+  printers, UPS. The macro sets PC / monitor / printers / UPS to 1 - set them from the client BOQ
+  head-end lines (higher number), plus consoles / wall displays (Pricelist row at 0 if priced 0).
+  Re-check the licence tier after any IO change. If "Other" is non-zero, go back to
   Phase 2 and tag the protocols. **Then verify the licence extensions - see below.**
 
 ### BA licence extensions - always verify, the macro over-adds
@@ -61,7 +63,10 @@ table above does not call for.** State in the review what the licence works out 
 - **ValvesAndActuators** - `… | Pipe Size | Flow | P Drop | Calc KV | Valve Size | Valve KVS |
   Valve Auth | Valve Model | Valve Accessory | Actuator Model | …`. Sized by KVS (`Options` B51=2);
   threaded below the 50 mm threshold, flanged above; spring return and weather shield per `Options`;
-  BV series e.g. `VKF46`; Globe preferred unless the spec says Ball/PICV.
+  BV series e.g. `VKF46`; Globe preferred unless the spec says Ball/PICV. In practice GTS types the
+  valve models straight into IOSummary O (two rows per valve, LEARNED C "Valves") and lists them in
+  the Valves direct section - PICV coils VPF44.65F25 + SAX61P03, globe VVF42.65-50 + SKB62/F,
+  butterfly VFW41.150 + SQL341E100.
 - **VFDs / MCCs** - selected by HP; MCC in the BOQ only when `Options` says `Yes`.
 - **FCUs / RoomUnits** - family follows the FCU protocol in `Options`: KNX -> `RDG100KN`/`RDG160KN`/
   `RDF600KN`; BIP -> `DXR2.E09/E10`; MSTP -> `RDB160BN`/`DXR2.M09/M10`; Modbus -> `RDF302`/`RDF300.02`;
