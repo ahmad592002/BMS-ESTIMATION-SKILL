@@ -8,12 +8,12 @@ These workbooks are macro-heavy with many hidden lookup sheets. **A plain XLSX l
 project and breaks every selection formula.** Always use Excel COM.
 
 ```powershell
-# attach to a running instance if the file is already open
+$env:BMS_WB = "<full path>\<Project>-BMS ESTIMATION.xlsm"   # every script reads this
+# Excel closed? open it the way a user would - NOT BindToMoniker (hidden instance dies with the script)
+Start-Process $env:BMS_WB   # then poll GetActiveObject until the workbook is listed
 $x = [Runtime.InteropServices.Marshal]::GetActiveObject("Excel.Application")
-# or start one
-$x = New-Object -ComObject Excel.Application; $x.Visible = $true
+$wb = $x.Workbooks | Where-Object { $_.FullName -eq $env:BMS_WB }
 $x.DisplayAlerts = $false
-$wb = $x.Workbooks.Open($path)
 
 $prev = $x.EnableEvents; $x.EnableEvents = $false   # stop Worksheet_Change firing mid-write
 # ... edits ...
@@ -26,8 +26,14 @@ Rules:
 - **Back up first**, every time: `Copy-Item $f "$f - BACKUP <stage>.xlsm"`.
 - **Save before running any macro.** Some crash Excel (`SelectVFDs` has); a saved file loses nothing.
 - Set `$x.AutomationSecurity = 3` when opening only to read, so macros do not run.
-- If COM returns *"Call was rejected by callee"* or *"RPC server unavailable"*, Excel is busy, showing
-  a dialog, or has crashed. Check `Get-Process EXCEL`, do not retry in a loop.
+- If COM returns *"Call was rejected by callee"*, *"Unable to set Calculation"* or the window shows the
+  file but `Workbooks.Count` is 0: a cell is in edit mode or a dialog is open - ask the user to press
+  Enter/Esc. *"RPC server unavailable"*: Excel closed or crashed. Do not retry in a loop.
+- **Macros act on the ActiveWorkbook** (unqualified `Sheets()`): activate the workbook and the target
+  sheet before every macro and verify `ActiveWorkbook.FullName`; keep one estimation file open.
+  `scripts/run_macro.ps1` does all of this.
+- Read-only check while the live window is busy: open the saved file in a separate
+  `New-Object Excel.Application` (`AutomationSecurity = 3`, ReadOnly), never touching the user's window.
 - `.Select()` can fail on protected sheets - macros usually work anyway without activating.
 - Merged cells: writing to the second cell of a merge does nothing and `ClearContents` throws. Values
   in the Breakdown header live in **column D**, not C.
@@ -54,8 +60,10 @@ against a file Excel currently has open - read through COM instead in that case.
 | Workstation `B8:B12` | `SUMIF(IOSummary!P:P, <protocol>, IOSummary!L:L)` | Software points by protocol |
 | Workstation `B13` | total SP minus the tagged ones | "Other" - must end at 0 |
 | Breakdown `D6` | `='Cover Page'!H5` | Project name, single source |
-| Breakdown `D9` | `=BOQ!J110` | Total value |
-| Breakdown `D23` | `=Product_Finder_…!K14` | **Siemens cost - does NOT follow the BOQ** |
+| Breakdown `D9` | `=BOQ!J<total row>` | Total value (row moves with the BOQ line count) |
+| Breakdown `D23` | `=Product_Finder_…!K14` | **Siemens cost - does NOT follow the BOQ** (run pf_refill) |
+| Breakdown `I23` | `=(D23*(1-E23))*(1+F23)` | Siemens discount applied ONCE here - Product Finder G11 stays 0 |
+| BOQ `K<r>` | `=VLOOKUP($D<r>,Pricelist!$A$2:$E$1000,3,FALSE)` | Net cost per unit - never paste another formula here |
 | Breakdown `I<n>` | `=F<n>*G<n>*H<n>` | qty x duration x rate |
 | Cover Page `H11` | `=Breakdown!D9` | Headline price |
 

@@ -53,7 +53,11 @@ physics dictates the part - raise it as a question instead.
 House standard seen across YALJ / P.Mansour / RAPEH: `QFM2120` (duct H&T), `QAE2120.010` (water temp),
 `AX-LS-FL-1HM`/`-1LM` (float switches), `QBM81-5` (fan DPS), `QBE2003-P16` (water pressure),
 `QBM81-10` (filter DPS), `AX-UL-SEP380-2` (ultrasonic level), `QBE3000-D16` (water DP), `RDF440BN`
-(modulating room thermostat).
+(modulating room thermostat). Full current list: LEARNED C "Field devices".
+
+**Valves** get two priced rows each (command -> valve body, feedback -> actuator) - PICV where the
+tender says PICV. Models and the Valves direct-list rule: LEARNED C "Valves". **FCU / VAV** are always
+one Integration row of 7 SP - LEARNED C.
 
 
 ## Build IOSummary with the sheet's own macros - never write raw cells
@@ -76,8 +80,12 @@ Hand-writing values destroys the block design. Use the workbook's routines:
 
 ## Lay the block out cleanly
 
-- **Sort the points by type within each block**: DI, then AI, AO, DO, SP. Never leave them in the
+- **Group the points by component** (Supply Fan, Exhaust Fan, Dampers, Filters, Coils & Valves, Sensors, Pump, ...) and **sort DI, AI, AO, DO, SP inside each component**. Never leave them in the
   order they came out of the source document.
+- **Put a small shaded title row above each component** - e.g. "Supply Fan", "Dampers", "Filters",
+  "Sensors", "Software Integration" - with `Interior.ColorIndex = 15`, the same
+  style the workbook uses for its own `IsTitle` rows. A title row carries no IO value and no H:L
+  formula.
 - **Leave exactly one blank row** between the last point and the TOTAL row, in every block. Delete the
   rest of the template's unused rows - a 23-block sheet loses ~150 empty rows this way.
 - When rewriting or trimming rows, **never ClearContents across H:L** - those are the
@@ -110,3 +118,69 @@ The protocol is usually stated in the point description or implied by the select
 
 Per-type point counts, the grand total, the field-device list, and the software-point split by
 protocol.
+
+## Build the layout in the fill pass - never retrofit rows into finished blocks
+
+Titles, sorting and blank-row trimming must be decided **before** the points are written, and applied
+in the same pass that fills the block. Do not try to insert title rows, re-sort, or delete rows in a
+block that is already populated:
+
+- repeated single-row `InsertIOLine` calls across many blocks destabilise Excel - in one run it
+  crashed into AutoRecover and reopened the file as `.xlsb`;
+- a batched `Rows(a:b).Insert` followed by clear-and-rewrite silently dropped point names and left the
+  totals wrong (BA 554 instead of 556);
+- `ClearContents` over H:L wipes the all-systems formulas.
+
+If a populated block needs a different layout, **clear the sheet and rebuild it**: `ClearIOSummary`,
+recreate the blocks, then write titles and sorted points together. That path is reliable and takes
+seconds.
+
+Save after each good state, and if a write fails, close the workbook **without saving** and reopen
+from disk rather than trying to repair a half-written sheet.
+
+## Proven workflow (Al Moosa University, 2026-10 - estimator: "very good way")
+
+**A. Read the points from the Site control schematics (B-93), all of them, before generating.**
+- Two formats exist:
+  1. *BMS SCHEDULE tables* (DI / DO / AI / AO / ALARM / HARDWIRED INTERLOCK / COMMUNICATION): parse
+     with `scripts/parse_sched.ps1` (word coordinates from MiKTeX `pdftotext -bbox`; also accepts
+     "PMS SCHEDULE"). COMMUNICATION = software point.
+  2. *DDC point strips* (vertical labels over DI/DO/AI/AO rows, marks are drawn dots, filled or
+     hollow, "x2"/"X2" multipliers): `scripts/parse_strip.ps1` renders the strip at 200 dpi and finds
+     dots/rings with a compiled C# scanner, ignores anything inside a text box, de-duplicates, and
+     types any label without a detected mark from its wording - flagged "inferred".
+  Use the table where a sheet has both. `scripts/combine.ps1` merges them into `points_all.csv`.
+- **Read the main plant sheets by eye** (chillers, cooling towers, pump groups, refrigerant
+  purge) - several equipment per sheet; the auto-parse is unreliable there.
+- Present per-unit points per equipment type + a review workbook (Per Equipment / Per Sheet /
+  All Points) before generating.
+
+**B. Templates and mapping** (`scripts/io_templates.txt`, `io_map.txt`, `io_lib.ps1`): one template
+per equipment kind - `@SHEET:nnn[:group]` pulls drawn points; hand-entered lines for read-by-eye or
+typical points. Keep the estimator's own block values (e.g. chiller SP 15). Dry-run first
+(`build_iosummary.ps1 -DryRun`) - it prints per-row IO and the expected grand total.
+
+**C. Generate with the EquipmentList button, then complete** (`scripts/run_all.ps1`):
+fully clear IOSummary (ClearIOSummary stops at row 2000) -> run `GenerateIOPointsFromEquipmentList`
+(stops at row 120) -> append the remaining rows with the macro's own steps -> fill every block
+bottom-up (`fill_iosummary.ps1`) -> rewrite H:L to each block's qty row (`fix_hl.ps1`) -> verify
+expected == got and Workstation "Other" = 0.
+
+**D. Layout:** points grouped by COMPONENT (Supply Fan, Exhaust Fan, Dampers, Filters, Coils &
+Valves, Heat Recovery, Sensors, Pump, Chiller, Breakers & Protection, Power Metering, Software
+Integration ...), DI/AI/AO/DO/SP inside each, grey bold title rows, one blank row before TOTAL.
+Name every point by its drawn component (PANEL / BAG / PRE / HEPA / CARBON filter - never a bare
+"FILTER STATUS").
+
+**E. Field devices** (`fill_devices.ps1`, rules in `io_lib.ps1` Get-Device2 + `io_flags.ps1`):
+only where the instrument is drawn, model = previous GTS projects' choice, column M = total
+(`=<per unit>*$A<qty row>`), dampers/valves/VFDs to their selection sheets.
+
+**F. Mark doubts cell by cell** (`apply_flags2.ps1`, rules in `io_flags2.ps1`): SP -> G, point ->
+its IO cell, device -> N, device qty -> M, equipment qty -> A, schematic choice / typical -> name
+cell B; reason in column Q "Check note". Assumed SP counts are always yellow.
+
+**G. Sources workbook** (`build_io_source.ps1` first time, `refresh_sources.ps1` after edits and at
+the very end): Equipment Summary, IO Points by Equipment (every
+point with drawing number, how it was read, basis, device -> model, note), Source Drawings,
+To Check (yellow), Field Devices. Totals must equal the IOSummary.

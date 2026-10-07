@@ -12,7 +12,10 @@ total list | unit net | margin | total net`. Quantities come **from the summary 
 retyped**. Margin factor sits in `M2`; pricing resolves through `Product_Finder` / `Listprice` /
 `Pricelist` - **never hardcode a price over a formula**.
 
-Totals: `J110` total, `J112` total cost, `J113` Siemens, `J114` Al Fanar, `J115` local.
+Totals sit just below the last item row (`J110..J115` on a ~100-line BOQ; the row moves with the
+line count - find the TOTAL label, and check `Breakdown!D9` points at the selling total).
+Every cost cell K must stay `=VLOOKUP($D<r>,Pricelist!$A$2:$E$1000,3,FALSE)`; new models need a
+Pricelist row (net price) first; items priced 0 on purpose need a Pricelist row at UP 0.
 
 **After generating, check nothing was dropped.** Compare the BOQ against the selection sheets - a
 valve or actuator selected in Phase 6 can fail to reach the BOQ. Reconcile part by part, not by
@@ -38,11 +41,17 @@ Take **every Siemens part code and quantity from the BOQ** into the item table:
   local items) are not in the Siemens quotation and belong in the Breakdown's other supplier rows.
 - Rows may already be part-filled from an earlier run, with **gaps** - scan from row 17 for the first
   empty `C` rather than appending at the end, and never leave a duplicate code.
-- Writing through COM: the qty cell rejects an integer (`Unable to cast Int32 to String`) - write it
-  **as a string**.
+- Use `scripts/pf_refill.ps1`: clears C17:E480 and writes every Siemens BOQ line as a Value2 array
+  (a single-cell integer write can fail with `Unable to cast Int32 to String`).
+- **`G11` (Discount %) stays empty / 0.** The Breakdown applies the Siemens discount (E23). Both set
+  = double discount and a fake ~55% margin.
 
 Check afterwards: `G13` = number of line items, `K14` = Siemens list total. `G13` should equal the
 count of distinct Siemens models in the BOQ.
+
+**Price chain** (answer "why is this price different?" from this): Pricelist UP = net (~list x 45%) ->
+BOQ cost; Product Finder K = list x (1 - G11) x 1.08 customs; Breakdown B.1 = K14 x (1 - E23); BOQ
+selling = Pricelist UP / 0.6. BOQ Siemens cost vs Breakdown B.1 differ by roughly the customs.
 
 ## Breakdown
 
@@ -55,17 +64,17 @@ Total Value, SOW, Status, Discount, Net Value) and cost sections A–H. Values g
 `Breakdown!D23` (Siemens selling cost) reads `=Product_Finder_...!K14`, **not** the BOQ. It does not
 follow a BOQ regeneration. After adding scope, the Product Finder must be refreshed with the new items
 or the Breakdown understates cost and overstates margin. No macro does this - it is an estimator step.
-**Cross-check `BOQ!J112` against `Breakdown!I91`; if they differ, the margin shown is wrong.**
+**Cross-check: Product Finder lines == BOQ Siemens lines (part + qty), G11 = 0, and Breakdown B.1 is
+within ~10% of the BOQ Siemens cost (customs). Anything else and the margin shown is wrong.**
 Never rewire D23 to hide the gap.
 
 **Sections E and F generate nothing - fill them from the nearest comparable project.**
-GTS rates seen so far: accommodation 3,000/month, rental car 2,500/month, car fuel 600/month,
-air ticket 1,200 each, T&C Engineer 13,000, Technician 6,000. Set durations from the contract period
-and site distance, and say which numbers are historical rates and which are your own judgement.
+Rates: LEARNED G "Breakdown expenses". Durations are the estimator's call - ask, and say which numbers
+are historical rates and which are your own judgement.
 
 ## Cover Page
 
-From `German Technical Services`, To (contact + company), Date, Ref as `BMS-R01-<Mon><Year>`, subject,
+From `German Technical Services`, To (contact + company), Date, Ref as `BMS-R00-<Mon><Year>`, subject,
 the standard 30-day-validity Siemens Desigo/BACnet paragraph, headline prices in **SAR excluding VAT**,
 then notes, inclusions, exclusions, payment/delivery/warranty terms.
 
@@ -77,7 +86,8 @@ then notes, inclusions, exclusions, payment/delivery/warranty terms.
 2. **Check for template carry-over.** Priced option lines survive from project to project (a
    "redundancy server" line appeared in three workbooks at an identical hardcoded value). Verify each
    against the tender; an identical figure in another project's workbook is the tell. Delete what this
-   tender does not ask for.
+   tender does not ask for - but a server the tender DOES ask for stays (one fault-tolerant server per
+   campus unless the BOQ says per building; priced on its own Cover Page line).
 
 Where the offer deliberately excludes something the tender asks for, state it as a **Deviations from
 tender BOQ** list rather than leaving the client to discover it at evaluation.
@@ -89,8 +99,13 @@ tender BOQ** list rather than leaving the client to discover it at evaluation.
 3. Every panel's capacity >= demand including spare; no panel over 250 points.
 4. Workstation licence tier matches total BA points; "Other" = 0.
 5. Every BOQ quantity traces to a summary sheet; no orphan or hand-typed lines.
-6. **`BOQ!J112` reconciles with `Breakdown!I91`** before any margin is quoted.
+6. **Product Finder == BOQ Siemens lines, PF G11 = 0, Breakdown B.1 ~ BOQ Siemens cost** before any
+   margin is quoted.
 7. Cover Page total == Breakdown Net Value == BOQ total.
 8. Notes and exclusions match the BOQ; deviations from the tender are declared.
 
-Present the audit as a pass/fail checklist, then the headline price.
+9. No #N/A / #REF in BOQ, Breakdown, Cover Page, Product Finder; every BOQ cost cell a VLOOKUP.
+10. Side files (IO Summary Sources, DDC List Sources, state file) regenerated from the final workbook.
+
+Present the audit as a pass/fail checklist, then the headline price. For a final revision the
+estimator asked for, go read-only and ask about each finding one at a time (LEARNED A).

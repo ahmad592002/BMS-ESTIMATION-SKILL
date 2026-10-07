@@ -1,28 +1,112 @@
 # Learned rules - BMS estimation
 
 Read this file at the start of **every** invocation of the `bms-estimation` skill. Rules here
-**override** the generic guidance in `SKILL.md` wherever the two conflict.
+**override** `SKILL.md` and the phase modules wherever they conflict.
 
 When the estimator changes something you produced: **apply it, then ask why** (spec / GTS standard /
-client preference / project condition / your error / commercial), and let their answer set the `Scope`.
-No answer given -> record with `Reason: not given` and `Scope: this project`, and never ask twice.
-See the "Self-upgrade: ask WHY, then record" section of `SKILL.md` for the full protocol.
-
+client preference / project condition / your error / commercial), and let the answer set the `Scope`.
+No answer -> record with `Reason: not given`, `Scope: this project`, and never ask twice.
 Edit an existing entry rather than adding a near-duplicate; a newer reason overrides an older one.
 Confirm in one line: `Learned: <title> (scope: <scope>).`
 
-Entry format:
+Entry format (keep it short - the rule first, the evidence after):
 
 ```markdown
 ## <short rule title>
-- **Phase:** <number/name>   **Date:** <YYYY-MM-DD>   **Project:** <name>
-- **Rule:** <the rule, imperative, one or two lines>
-- **Change:** <what was changed - from -> to>
-- **Reason:** <their answer, in their terms> | not given
-- **Reason type:** spec | GTS standard | client preference | project condition | my error | commercial
-- **Scope:** always | this client | this project type | this project
-- **Also changed in SKILL.md:** <section, or "no">
+- **Rule:** <imperative, one to four lines>
+- **Source:** <project> <YYYY-MM-DD> | <reason type> | scope: <always / this client / this project> | "<estimator's words>"
 ```
+
+Cleaned up after Al Moosa University (2026-10-07): entries grouped by topic, duplicates merged, rules
+the estimator confirmed as standing practice promoted to `always`. Full history: git log of the repo.
+
+---
+
+## A. Way of working
+
+## One phase per invocation, then stop
+- **Rule:** Complete one phase, present it, stop. Never chain phases; never mark DONE without approval
+  or an explicit "next".
+- **Source:** skill setup 2026-09-28 | GTS standard | scope: always | "finish one phase per time"
+
+## Ask why a correction was made, then scope the rule
+- **Rule:** After applying a substantive correction, ask once whether it came from the spec, GTS
+  standard, this client, this project, your error or a commercial call; set `Scope` from the answer.
+  Never generalise an unexplained edit.
+- **Source:** skill setup 2026-09-28 | GTS standard | scope: always
+
+## Self-upgrades go up as pull requests, never to main
+- **Rule:** Batch a phase's rules on a `learn/<phase>-<slug>` branch and open a PR against `main` of
+  ahmad592002/BMS-ESTIMATION-SKILL. Never commit to `main`, never self-merge. A failed push never
+  blocks the estimation.
+- **Source:** skill setup 2026-09-28 | GTS standard | scope: always
+
+## Final review: read-only, one finding at a time
+- **Rule:** When asked for a final check / full revision, go phase 0 -> 7 WITHOUT editing, and stop at
+  each finding to ask (AskUserQuestion, recommended option first). Apply only what the estimator picks.
+  Things the estimator says they will change by hand (Cover Page wording, SOW text) are theirs - list
+  them, never edit them.
+- **Source:** Al Moosa 2026-10-06 | GTS standard | scope: always | "ASK ME FOR EVERY ONE BY ONE"
+
+## The estimator owns file names - never rename or move the live workbook
+- **Rule:** Work on the file the estimator says is final, under the name they gave it. Do not rename,
+  move or "promote" files on your own; set `$env:BMS_WB` to their path. Before a large edit, take a
+  `SaveCopyAs` backup into `Old Versions\`.
+- **Source:** Al Moosa 2026-10-06 | GTS standard | scope: always | "NO KEEP THE FINAL VERSION THE ONE I WANT"
+
+## Only final files in the project root; everything else in "Old Versions"
+- **Rule:** Backups (`SaveCopyAs`) and superseded deliverables go straight into `Old Versions\`. The
+  root holds the inputs (BOQ, Drawings, Specifications), the live workbook, the current side files and
+  `_ESTIMATION_STATE.md`.
+- **Source:** Al Moosa 2026-10-01 | GTS standard | scope: always
+
+## Every deliverable has a "where it came from" workbook - regenerate it at the end
+- **Rule:** Keep `<project> - BMS Equipment Takeoff.xlsx`, `<project> - IO Summary Sources.xlsx`,
+  `<project> - DDC List Sources.xlsx` and `_ESTIMATION_STATE.md` in step with the FINAL workbook. After
+  the last edit, rebuild them (`refresh_sources.ps1`, `ddc_sources.ps1`) and check their totals equal
+  the workbook (DI/AI/AO/DO/SP, panel count).
+- **Source:** Al Moosa 2026-10-06 | GTS standard | scope: always | estimator chose "Regenerate for final"
+
+## Mark in yellow everything not 100% from the project data - only the doubtful cell
+- **Rule:** Any quantity, point, SP count, schematic choice, device or size not taken directly from
+  this project's drawings / spec / BOQ gets `Interior.Color = 65535` + a one-line reason. Only the cell
+  in doubt: SP -> G; inferred point -> its IO cell; device -> N; device qty -> M; equipment qty -> A;
+  schematic choice -> name cell B once per block. Reason in IOSummary Q (never P - P is the protocol),
+  EquipmentList F. Assumed SP counts and assumed valve/damper sizes are ALWAYS yellow.
+- **Source:** Al Moosa 2026-10-01 | GTS standard | scope: always | "no every thing yellow like that"
+
+---
+
+## B. Quantities (Phase 1)
+
+## Any quantity doubt -> take the HIGHER number, and say so
+- **Rule:** Riser vs client BOQ, a group that may double count, a symbol drawn twice, a "duplicate"
+  kept at qty 0 - always take the higher count. Yellow the qty with "riser X / BOQ Y - higher taken"
+  and add one Cover Page note ("the riser quantity differs from the BOQ; we take the higher").
+  Units above the riser count have no drawn location: the DDC builder puts them on the same
+  panel/network after the drawn floors ("BOQ extra (location not drawn)").
+- **Source:** Al Moosa 2026-10-05 | GTS standard (confirmed as standing rule) | scope: always |
+  "take the highest number always" - e.g. MAB FCU 139 -> 348 (BOQ), VAV kept 691 (riser)
+
+## Equipment comes from the drawings when the client BOQ has no equipment counts
+- **Rule:** Client BOQs often price only controllers, devices and LS items. Build the EquipmentList
+  from the BMS risers / schematics (per-tag takeoff workbook: tag -> panel -> room -> interface), then
+  compare with any BOQ count using the "higher number" rule.
+- **Source:** Al Moosa 2026-10-01 | project condition | scope: always (method)
+
+## A duty/standby set with package tags is ONE equipment row at qty 1
+- **Rule:** `BSP-01`, `BSP-02`, `BSP-SET-01` -> one row "... Set" qty 1 carrying all points; qty 2
+  multiplies the shared package points.
+- **Source:** RAPEH 2026-09-28 | my error | scope: always
+
+## Client BOQ items not drawn on the risers still get points
+- **Rule:** Read the client BOQ device lines against the IOSummary. Items the BOQ asks for but the
+  risers do not draw get a new IOSummary line spread realistically over the panels that serve them
+  (e.g. 32 room extra-low DP transmitters over the roof-AHU DDC panels). Devices that are by others
+  (leak detection, security door contacts, HCHO) get monitoring points / integration only. Sensors the
+  room thermostats or a multi-sensor already cover (zone T, T/RH, zone CO2, O2 via the AQ sensor) are
+  not added twice. Declare each choice in a Cover Page note.
+- **Source:** Al Moosa 2026-10-05 | GTS standard | scope: always | "ADD THEM IN THE IO SUMMARY ... DIVIDE THEM ON THE AHU TO BE REALISTIC"
 
 ---
 
