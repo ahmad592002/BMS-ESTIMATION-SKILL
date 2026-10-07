@@ -8,8 +8,9 @@ embedded in the BOQ by Phase 7.
 ## Rules
 
 - **One row per equipment family, not per tag.** `Exhaust Fan` qty 23, not EF-01…EF-23.
-- **`Qty` from the schedule/drawings**, verified against two sources where possible. Any disagreement
-  between the mechanical schedule and the client BOQ is a question, not a judgement call.
+- **`Qty` from the schedule/drawings**, verified against two sources where possible. When two sources
+  disagree (riser vs client BOQ, duplicates), **take the higher number**, yellow the qty with both
+  figures, and add the Cover Page note (LEARNED B - GTS standing rule).
 - **`Function` is exactly `Monitor` or `Monitor&Control`.** Monitoring-only equipment gets status and
   alarm DIs and no outputs - this one word decides the IO count.
 - **`Type` must come from the `TemplateLists` picklist**: `Chilled Water System`, `Air Handling Unit`,
@@ -39,3 +40,24 @@ Ask before inventing equipment that is implied but not scheduled.
 
 The full table (SN, Qty, Equipment, Function, Type) plus a subtotal per discipline. This is the phase
 the estimator checks hardest - make it easy to scan.
+
+## Proven workflow (Al Moosa University, 2026-10 - estimator: "very good way")
+
+1. **Read the client BOQ first** (`dump_sheets.ps1`). It often prices only controllers, field
+   devices and LS items - no equipment counts. Equipment then comes from the drawings.
+2. **The BMS system-architecture risers (B-92) are the equipment source.** Render each A0 riser
+   as a 4x3 grid of tiles at ~140 dpi (`pdftoppm -x -y -W -H`) and read them visually - extracted
+   text scrambles which item hangs on which panel. Use `pdftotext -raw` + `grep -o` only to
+   cross-check repeated symbols (FM200, FCS, LIFT, "xNOS").
+3. **Write one EquipmentList row per family per building** (`ATC - ...`, `EEC - ...`), tags in the
+   name. Head-end interfaces (FA, LCS, ELV, VT, CBS) go under the building that holds the servers -
+   never a 4th "Campus" building.
+4. **Build the per-tag takeoff workbook** (`scripts/build_takeoff.ps1` from `panels.txt` +
+   `items.txt`): every tag -> DDC/RIO/PLC -> room -> interface. Untagged groups ("AHU 5NOS") become
+   `AHU R01-07 #1..5`; duplicate symbols get qty 0 (grey) so they stay visible but uncounted.
+   Sheets: Equipment Register, Per DDC Panel, Summary (incl. drawing vs BOQ), Drawing Issues.
+5. **Sync the EquipmentList to the takeoff** and check the totals match per building.
+6. **Follow the workbook's own Type list** (`Lists!F`: AHU, CWS, FCU, VAV, Fan, Pump, ...), not the
+   long names above, when the dropdown uses it.
+7. **Yellow** the qty cell (B) or name cell (C) of every row whose quantity or identity is not 100%
+   from the data, reason in EquipmentList column F (see LEARNED "Mark in yellow").

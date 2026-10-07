@@ -12,7 +12,12 @@ then **one row per panel from row 5 down**, panel name in column A.
   line. Engineering a different count is a commercial decision for the estimator, not a silent fix.
   Where the count is not stated, size panels to roughly 200 points each.
 - Name panels by location (`DDC-GF-01`, `DDC-R-02`, `DDC-B1-03`) or by the unit served
-  (`DDC-03 (AHU-03)`) when locations are unknown.
+  (`DDC-03 (AHU-03)`) when locations are unknown. Where the drawings give panel tags, keep them.
+- **GTS uses PXC, never PLC.** Panels drawn as PLC / RIO become `DDCP-<bldg>-<level>-<nn>`.
+- An overloaded drawn panel splits into separate panels `<name>-1`, `-2`; IP unitary controllers
+  (FCU/VAV) go on network rows split floor by floor - every row <= 250 incl. spare.
+- Build with `scripts/ddc_build.ps1 -Write` (placement from the takeoff; `el_map.txt`,
+  `host_map.txt`, `panel_rename.txt` are per-project data files) and format with `full_chain.ps1`.
 - **Group by physical proximity first** (same plantroom or floor), then by discipline. Without a floor
   plan, group by served unit and say so - real grouping follows plantrooms, and the pairing will shift
   once drawings arrive even if the count does not.
