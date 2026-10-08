@@ -172,3 +172,6 @@ Reference estimations live in `~/OneDrive/Desktop/GTS/BMS_PROJECTS/` (Ajyad Towe
 Mansour, RX Premium Hub, Al Moosa University). **YALJ** is the best filled-template example (all 35
 sheets); **07- Al Moosa University** is the best full-process example - drawings-only tender (3
 buildings, 200 equipment lines, 116 PXC panels), with its takeoff, IO / DDC sources and state file.
+**REHAB OASIS RIYADH, KSA** (`~/OneDrive/Desktop/REHAB OASIS RIYADH, KSA/`) is the example of a
+consultant-IO-list-only tender continued in the estimator's own workbook (2 buildings, 31 equipment
+rows, 21 panels + 3 EMS network rows, 1.28 M SAR).

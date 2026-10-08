@@ -95,7 +95,8 @@ tender BOQ** list rather than leaving the client to discover it at evaluation.
 ## Exit criteria - the full final audit
 
 1. `EquipmentList` qty == `DDC List` row 3 `Total` == row 4 `Assigned`, per column.
-2. IOSummary "All Systems" == DDCSummary == DDCFullSummary.
+2. IOSummary "All Systems" == DDCSummary == DDCFullSummary, and **DDCSummary has one panel per DDC
+   List row, network rows included** (Rehab: 3 EMS network rows missing -> 494 SP with no controller).
 3. Every panel's capacity >= demand including spare; no panel over 250 points.
 4. Workstation licence tier matches total BA points; "Other" = 0.
 5. Every BOQ quantity traces to a summary sheet; no orphan or hand-typed lines.

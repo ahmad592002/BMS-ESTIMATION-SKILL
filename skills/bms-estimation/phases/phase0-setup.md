@@ -16,7 +16,12 @@ and the `Options` sheet filled and approved.
      the state file; every later phase reconciles against it (higher number wins - LEARNED B).
    - Search the PDF text for scope words before assuming something is included:
      `pdftotext -enc UTF-8 "<sow>.pdf" - | grep -inE "server|workstation|MDB|generator|UPS|meter"`
-3. **Copy the newest master** from `~/OneDrive/Desktop/GTS/BMS_PROJECTS/BMS Template 2026 V03.xlsm`
+   - **The folder may already hold the estimator's own filled workbook** (Rehab Oasis: an "In Hand"
+     estimation built to BOQ). Then do NOT copy the master: back it up, continue in it under its name,
+     and survey it like an input - which sheets are filled, which are stale, which defects it carries.
+   - **A consultant "BMS consolidated IO points" PDF can be the only technical input** (no drawings,
+     no spec). Its text layer is often scrambled - render the pages as images to read the numbers.
+3. **Copy the newest master** (only when there is no estimator workbook yet) from `~/OneDrive/Desktop/GTS/BMS_PROJECTS/BMS Template 2026 V03.xlsm`
    into the project folder as `<Project>-BMS ESTIMATION.xlsm`. **Never edit the master in place.**
    Set `$env:BMS_WB` to its full path - every script in `scripts/` reads it. If the estimator later
    renames the file, follow their name; never rename or move it yourself.

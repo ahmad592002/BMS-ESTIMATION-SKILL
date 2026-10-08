@@ -51,8 +51,11 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
 ## The estimator owns file names - never rename or move the live workbook
 - **Rule:** Work on the file the estimator says is final, under the name they gave it. Do not rename,
   move or "promote" files on your own; set `$env:BMS_WB` to their path. Before a large edit, take a
-  `SaveCopyAs` backup into `Old Versions\`.
-- **Source:** Al Moosa 2026-10-06 | GTS standard | scope: always | "NO KEEP THE FINAL VERSION THE ONE I WANT"
+  `SaveCopyAs` backup into `Old Versions\`. The estimator renames mid-project (Rehab: `3__InHand-ALL`
+  -> `3_REHAB OASIS RIYADH, KSA.xlsm` overnight) and keeps other estimations open: at the start of
+  every invocation list the project folder's `*.xlsm` and attach by FULL PATH, never by a remembered
+  name. If the folder already holds the estimator's filled workbook, continue in it - no master copy.
+- **Source:** Al Moosa 2026-10-06, Rehab Oasis 2026-10-08 | GTS standard | scope: always | "NO KEEP THE FINAL VERSION THE ONE I WANT"
 
 ## Only final files in the project root; everything else in "Old Versions"
 - **Rule:** Backups (`SaveCopyAs`) and superseded deliverables go straight into `Old Versions\`. The
@@ -88,6 +91,18 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
 - **Source:** Al Moosa 2026-10-05 | GTS standard (confirmed as standing rule) | scope: always |
   "take the highest number always" - e.g. MAB FCU 139 -> 348 (BOQ), VAV kept 691 (riser)
 
+## EquipmentList qty = physical equipment items - never sets, groups, circuits or breakers
+- **Rule:** Count every tagged physical item: `EAF-B1-GF-01~18` = 18 fans; `SP-B1-B02-01~02` = 2
+  pumps (not 1 set); `DBWP-01~03` = 3 pumps; a lighting DB = 1 (its circuits are points, not qty);
+  an MDB / EMDB = 1 board (its breakers are points). Different duties are different rows (car park
+  exhaust PEAF vs fresh air PFAF). A tag repeated inside its own range (`EAF-B1-GF-11` inside
+  `01~18`) is a duplicate - do NOT add it (the higher-number rule is for two sources disagreeing,
+  not for a tag listed twice). Then rewrite the IOSummary per-unit points so the totals still equal
+  the IO list (points per pump, circuits per DB, breakers per board).
+- **Source:** Rehab Oasis 2026-10-07 | GTS standard | scope: always | "is the way to count everywhere" |
+  "B1-GF-01-18 i think this are 18 equ"; estimator set SP 30, DBWP 9, IRRP 4, FIP 6, RCP 10,
+  lighting DB 22, MDB 3, EAF 36, PEAF 12 + PFAF 12
+
 ## Equipment comes from the drawings when the client BOQ has no equipment counts
 - **Rule:** Client BOQs often price only controllers, devices and LS items. Build the EquipmentList
   from the BMS risers / schematics (per-tag takeoff workbook: tag -> panel -> room -> interface), then
@@ -118,6 +133,34 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   B2 = Type, B4 = name; copy rows 1:30; insert; clear B2, A4:G26, M4:N26). `ClearIOSummary` deletes
   only A1:A2000 - delete the whole used range first. Check block count == EquipmentList rows.
 - **Source:** Al Moosa 2026-10-01 | GTS standard + my error | scope: always
+
+## Adding equipment to a finished estimation: APPEND, never regenerate
+- **Rule:** Once IOSummary / DDC List hold the estimator's work (field devices, assignments), never
+  re-run `GenerateIOPointsFromEquipmentList` / `GenerateEquipmentForDDCList` for new EquipmentList
+  rows - they wipe it. Append: one block per new row after the last block with the macro's own steps
+  (IOTemplate A4/B2/B4 -> copy 1:30 -> insert -> clear template), fill, trim to one blank row; then
+  add DDC List columns (copy the last column's format, row 2 name, row 3 total, row 4 `=SUM(x5:x121)`)
+  and assign. Then regenerate DDCSummary -> ... -> BOQ (the Rehab EMS network rows were left out of
+  DDCSummary, so their 494 SP got no controller).
+- **Source:** Rehab Oasis 2026-10-08 | GTS standard | scope: always | "i don't want to lost the io summary and ddc list if i generate it i lost field device"
+
+## Consultant IO-point list tenders: transcribe each entry as written
+- **Rule:** When the tender is a consultant "BMS consolidated IO points" PDF (SYSTEM | POINT | DI |
+  AI | DO | AO | ALARM | COMMUNICATION), copy each system entry's points into its block exactly as
+  printed - do not redistribute per pump / per set. Points printed in an impossible column (start/stop
+  under AI, CO level under DO) stay as printed, yellow + note. ALARM-only rows -> 1 DI. A merged
+  COMMUNICATION "1" -> 1 SP per listed data row. Where one block must carry tags with different counts
+  (lighting circuits per DB, breakers per MDB) use the average rounded UP, yellow, report total in Q.
+  The PDF text layer is usually scrambled - read the pages as images (pdftoppm -r 130).
+- **Source:** Rehab Oasis 2026-10-07 | estimator instruction (reason not given) | scope: this project, candidate for always | "just take the io and put it from data to excel as it's don't think in it if set if not"
+
+## Point names: written out in full, no drawing shorthand
+- **Rule:** Never leave consultant abbreviations as point names: S.A./R.A./E.A./F.A. -> SUPPLY /
+  RETURN / EXHAUST / FRESH AIR; PDS -> ... AIR FLOW STATUS (DIFFERENTIAL PRESSURE SWITCH); VSD/VFD
+  REFERENCE -> SPEED COMMAND, FEEDBACK -> SPEED FEEDBACK; generic LOW LEVEL / COMMON ALARM get their
+  system (FUEL TANK HIGH LEVEL, UPS COMMON ALARM). Keep a drawing acronym only in brackets to trace it
+  (BOOSTER WATER PUMPS (BWP)). Equipment names spelled out with the tag code in brackets.
+- **Source:** Rehab Oasis 2026-10-07 | GTS standard | scope: always | "somthing of the tags not clear use clear name"
 
 ## Never write raw cells into IOSummary blocks; never retrofit layout
 - **Rule:** Use the block design (macro-built blocks, `InsertIOLine` for extra rows), decide titles /
@@ -162,7 +205,12 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   (by FA) or sprinkler flow switches. Column O is a VLOOKUP on N - write the FieldDevices!A text in N,
   never type O. Column M = `=<per unit>*$A<qty row>` (FieldDevices sums M). A one-project-only model
   is a candidate for the house standard for the same duty.
-- **Source:** SDA 2026-09-28, Al Moosa 2026-10-01 | GTS standard | scope: always
+  Rehab Oasis final picks (estimator, consultant IO list, no drawings): fan DPS QBM81-3, filter DPS
+  QBM81-10, duct T QAM2112.040, outdoor T QAC2030, duct RH QFM2100 (humidity only), duct CO2 QPM2100,
+  duct static (fan VFD) QBM3020-25, air flow / car park fan proof of flow QVM62.1-HE, car park CO
+  Greystone CMD5B1000-MOD (Modbus, "10 sensors per system" + Cover note), sump high / high-high and
+  fuel-tank high AX-LS-FL-1HM, tank low AX-LS-FL-1LM, water tank level switch JCI F263MAP-V01C.
+- **Source:** SDA 2026-09-28, Al Moosa 2026-10-01, Rehab Oasis 2026-10-08 | GTS standard (Rehab picks: this project, reason not given) | scope: always
 
 ## Valves: two priced rows, PICV where the tender says PICV
 - **Rule:** Never leave a valve on a "V.A. Selection Sheet" device (no price). Each valve = command row
@@ -184,6 +232,20 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   butterfly; damper 2.5 m2 default), mark every model yellow "size not in drawings", and list
   "sizes assumed - to be confirmed" on the Cover Page. Real sizes need the mechanical schedules.
 - **Source:** Al Moosa 2026-10-06 | project condition (recurs) | scope: always | "Keep default 2.5 m²"
+
+## Energy metering / EMS integration - SP per item
+- **Rule:** When the client BOQ asks to connect an energy metering system, price it as SP only (meters
+  by others): EMS / energy-metering control panel 50 SP each, water meter connection 2 SP each,
+  electrical multimeter connection 10 SP each. Meters go on network rows <= 250 incl. spare
+  (Rehab: 97 water on one row, 30 multimeters on two); the panels on the electrical-room DDCs.
+- **Source:** Rehab Oasis 2026-10-08 | estimator's figures (reason not given) | scope: this project, use as default and confirm | "for the system control panel 50 sp for the water meter 2 sp for the electrical meter 10 sp"
+
+## Valves, damper actuators, VFDs: not priced when the tender is an IO-point list only
+- **Rule:** Rehab Oasis (consultant IO list, no mechanical schedules): the estimator priced NO valves,
+  damper actuators or VFDs although the list has a flow control valve, modulating / motorized dampers
+  and VFD signals; the template Cover notes exclude them. Ask on the next IO-list-only tender before
+  applying LEARNED C "Valves".
+- **Source:** Rehab Oasis 2026-10-08 | estimator's final BOQ (reason not given) | scope: this project
 
 ## Tag every software point's protocol in column P
 - **Rule:** Workstation counts SP with `SUMIF(IOSummary!P:P, <label>, L:L)`; labels exactly `MODBUS`,
@@ -225,6 +287,13 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   controllers. (`run_macro.ps1 -Sheet DDCSummary` handles it.)
 - **Source:** Al Moosa 2026-10-02 | my error | scope: always
 
+## DDCSummary panel count must equal DDC List rows - network rows included
+- **Rule:** In every audit compare the DDC names in DDCSummary with DDC List column A. Rehab final:
+  DDC List 24 rows (21 panels + 3 EMS network rows), DDCSummary 21 - the network rows were added after
+  the last GenerateDDCSummary, so 494 SP had no controller in the BOQ while the BA licence did count
+  them. A missing row = rerun the chain from GenerateDDCSummary.
+- **Source:** Rehab Oasis 2026-10-08 | audit finding | scope: always
+
 ---
 
 ## F. Ancillaries (Phase 6)
@@ -261,8 +330,9 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   rack-mounted server (ATC BOQ item, qty 1) for all 3 buildings; MAB workstations are "remote users
   of the servers located in ATC"; EEC has none. "Fault tolerant" = one machine with redundant
   internals, not two servers. Price it separately on the Cover Page (cost / 0.6). If the tender has
-  no server line, delete the template's carried-over server line (SDA).
-- **Source:** SDA 2026-09-28 (deleted), Al Moosa 2026-10-07 (kept 1) | spec | scope: always
+  no server line, delete the template's carried-over server line (SDA) and add the Cover note
+  "no redundancy server in your data" (Rehab).
+- **Source:** SDA 2026-09-28 (deleted), Al Moosa 2026-10-07 (kept 1), Rehab Oasis 2026-10-08 (deleted + note) | spec | scope: always
 
 ---
 
@@ -309,8 +379,11 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   per person; rental car 2,500; fuel 600; air ticket 1,200 each; T&C engineer 13,000; design engineer
   15,000; supervisor 7,000; technician 6,000; draftsman 6,000; contingency 1.5%. The DURATION is the
   estimator's call - ask (Al Moosa: 10 months site, edited by hand). Never change the Siemens discount
-  (E23) yourself - commercial.
-- **Source:** SDA 2026-09-28, Al Moosa 2026-10-06 | GTS standard (rates) | scope: always
+  (E23) yourself - commercial. Data points (commercial - never auto-apply): Al Moosa E23 55%, BOQ
+  margin 40%; Rehab Oasis (supply + T&C, 2 buildings, 1.28 M SAR) E23 50%, BOQ margin 40%, per diem
+  2 x 1 month, accommodation / car / fuel 1 x 1 month, design engineer and technician 1 x 1.5 months,
+  no air tickets -> gross margin 29%.
+- **Source:** SDA 2026-09-28, Al Moosa 2026-10-06, Rehab Oasis 2026-10-08 | GTS standard (rates) | scope: always
 
 ## Cover Page: notes must match the BOQ; carry-over lines removed
 - **Rule:** Re-read every note after each BOQ regeneration: nothing excluded that the BOQ prices, no
@@ -318,8 +391,12 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   for this kind of tender: valve sizes assumed; meters by others, integration included; IO estimated
   where no schematic; higher of riser/BOQ taken; BOQ items not on risers and how they are covered.
   Price lines kept separate when asked (server; Al Moosa also split valves & actuators onto its own
-  line). Payment / warranty / SOW wording is the estimator's.
-- **Source:** SDA 2026-09-28, Al Moosa 2026-10-06 | GTS standard | scope: always
+  line). Payment / warranty / SOW wording is the estimator's. Rehab notes added by the estimator:
+  "we estimate IO point for equipment that don't have IO in your data", "no redundancy server in your
+  data", "for the CO gas system we estimate 10 sensor per system". The lower notes block (rows ~88+:
+  FCU transformers, chiller plant manager, AHUs from chilled water riser) is carried over from older
+  projects - flag it in the final review, never delete it yourself.
+- **Source:** SDA 2026-09-28, Al Moosa 2026-10-06, Rehab Oasis 2026-10-08 | GTS standard | scope: always
 
 ---
 
@@ -364,9 +441,11 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
 ## PowerShell traps that already cost real damage
 - **Rule:**
   - Variable names are case-insensitive: `$K`/`$k`, `$V`/`$v`, `$bq`/`$BQ`, `$yel`/`$YEL` are ONE
-    variable (hit again 2026-10-07). Use distinct names.
+    variable (hit again 2026-10-07 at Al Moosa AND Rehab: `$K` map + `foreach ($k ...)`). Never use a
+    one-letter loop variable that matches another variable; use `$key`, `$eqName`, `$rowIx`.
   - `[ordered]@{228='x'}` indexed with an int returns by POSITION -> null -> blank cells written (20
     point names blanked, 2026-10-06). Use arrays of pairs or string keys; refuse to write empty values.
   - `$host` is reserved; `cat` is Get-Content; index as `$v[($r+2),2]`, not `$v[$r+2,2]`; `"$r:"`
     needs `"${r}:"`; `{0,>10}` is invalid; cast every value written to a cell (`[string]`/`[double]`).
-- **Source:** Al Moosa 2026-10-01..07 | my error | scope: always
+    (`$v[$r+2,1]` -> "op_Addition" error, hit again at Rehab 2026-10-07.)
+- **Source:** Al Moosa 2026-10-01..07, Rehab Oasis 2026-10-07 | my error | scope: always
