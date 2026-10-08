@@ -59,6 +59,18 @@ House standard seen across YALJ / P.Mansour / RAPEH: `QFM2120` (duct H&T), `QAE2
 tender says PICV. Models and the Valves direct-list rule: LEARNED C "Valves". **FCU / VAV** are always
 one Integration row of 7 SP - LEARNED C.
 
+## Source = a consultant IO-point list (no schematics)
+
+Copy each system entry's points into its block **as printed** (LEARNED C "Consultant IO-point list"):
+ALARM-only rows -> 1 DI; merged COMMUNICATION "1" -> 1 SP per data row; impossible columns kept as
+printed and yellowed; varying counts per tag (circuits per DB, breakers per board) -> average rounded
+up, yellowed. Write every point name in full (LEARNED C "Point names"). Present the IOSummary total
+next to the list's own total so the estimator sees any multiplication by unit quantity.
+
+## Equipment added after the IOSummary is filled - append, never regenerate
+
+The generate buttons wipe field devices and DDC assignments. Append the new blocks and DDC List
+columns instead (LEARNED C "Adding equipment to a finished estimation").
 
 ## Build IOSummary with the sheet's own macros - never write raw cells
 
