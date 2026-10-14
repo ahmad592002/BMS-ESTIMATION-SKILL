@@ -301,6 +301,13 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   follows column Q (SUMIFS), so the BOQ picks it up on the next StartBOQGeneration.
 - **Source:** Rotortrade 2026-10-14 | my error (gate not checked before BOQ) | scope: always
 
+## Address keys must cover every TX-I/O module on a panel
+- **Rule:** After SelectControllersForSheet, a panel with more than 24 TX-I/O modules needs TXA1.K24 (1-24)
+  AND TXA1.K-48 (25-48). The macro gave Rotortrade DDC-B01-RF-02 (25 modules) only the K-48. Add the
+  missing key on a free controller row in the DDCSummary block (column Q + R), then BOQ + pf_refill. Manual
+  DDCSummary edits are wiped by GenerateDDCSummary - log them in the state file.
+- **Source:** Rotortrade 2026-10-14 audit | my error (not checked) | scope: always
+
 ## V04 FieldDevices already holds room-unit rows by part number (rows ~90-97, column A blank)
 - **Rule:** QMX3.P34, DXR2.E09, DXR1.M09PLZ-112, QMX1.M34H, RDF600KN, RDF460BN, QPM1104 sit in hidden
   rows with a blank description. To use one, write the description into column A of THAT row - never add
@@ -421,6 +428,13 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   2 x 1 month, accommodation / car / fuel 1 x 1 month, design engineer and technician 1 x 1.5 months,
   no air tickets -> gross margin 29%.
 - **Source:** SDA 2026-09-28, Al Moosa 2026-10-06, Rehab Oasis 2026-10-08 | GTS standard (rates) | scope: always
+
+## Server line follows the drawings, even without the word "redundancy"
+- **Rule:** When the BMS riser draws server units in a BMS server cabinet (Rotortrade: 2 x "SERVER EQUIPMENT"
+  in BMS SERVER-01) or the design basis says "central servers", keep the separate Cover server line and
+  name it after the drawing ("BMS Servers (main + standby, as per riser ...)") with a note that it can be
+  struck without touching the BMS price. Search the tender text for server / redundan / workstation first.
+- **Source:** Rotortrade 2026-10-14 | estimator asked "what do you think" -> my recommendation accepted | scope: always
 
 ## Cover Page: notes must match the BOQ; carry-over lines removed
 - **Rule:** Re-read every note after each BOQ regeneration: nothing excluded that the BOQ prices, no
