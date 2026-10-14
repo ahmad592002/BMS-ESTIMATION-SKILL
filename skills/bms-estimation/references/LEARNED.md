@@ -154,6 +154,13 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   The PDF text layer is usually scrambled - read the pages as images (pdftoppm -r 130).
 - **Source:** Rehab Oasis 2026-10-07 | estimator instruction (reason not given) | scope: this project, candidate for always | "just take the io and put it from data to excel as it's don't think in it if set if not"
 
+## Never use "~" in EquipmentList / IOSummary names
+- **Rule:** Write tag ranges as `CH-01..03`, never `CH-01~03`. Excel lookups treat `~` as an escape
+  character, so GenerateDDCSummary silently finds no IO for those rows (Rotortrade: DDCSummary had 315
+  DI instead of 722, VAV SP missing, BOQ short on modules). After GenerateDDCSummary always check
+  DDCSummary TOTAL rows == IOSummary grand total.
+- **Source:** Rotortrade 2026-10-14 | my error | scope: always
+
 ## Point names: written out in full, no drawing shorthand
 - **Rule:** Never leave consultant abbreviations as point names: S.A./R.A./E.A./F.A. -> SUPPLY /
   RETURN / EXHAUST / FRESH AIR; PDS -> ... AIR FLOW STATUS (DIFFERENTIAL PRESSURE SWITCH); VSD/VFD
@@ -286,6 +293,20 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   Controllers!L > 0. Run from another sheet it selects nothing and the BOQ silently has no
   controllers. (`run_macro.ps1 -Sheet DDCSummary` handles it.)
 - **Source:** Al Moosa 2026-10-02 | my error | scope: always
+
+## Check every panel PROVIDED >= TOTAL WITH SPARE after SelectControllersForSheet
+- **Rule:** The selection picks on hardware points; a panel with many SP can get a PXC4.E16-2 whose SP
+  capacity is too small (Rotortrade B03 60 SP vs 42, SITE 72 vs 48). Swap the controller cell (DDCSummary
+  column Q) to PXC5.E24 (16 UIO + 2 DI + 6 RO, 120 SP - strictly more than PXC4) and recheck. Controllers!L
+  follows column Q (SUMIFS), so the BOQ picks it up on the next StartBOQGeneration.
+- **Source:** Rotortrade 2026-10-14 | my error (gate not checked before BOQ) | scope: always
+
+## V04 FieldDevices already holds room-unit rows by part number (rows ~90-97, column A blank)
+- **Rule:** QMX3.P34, DXR2.E09, DXR1.M09PLZ-112, QMX1.M34H, RDF600KN, RDF460BN, QPM1104 sit in hidden
+  rows with a blank description. To use one, write the description into column A of THAT row - never add
+  a second row with the same part number (both SUMIFS count it and the BOQ lists the device twice:
+  Rotortrade DXR1 + QMX1 x47 duplicated, ~58k SAR).
+- **Source:** Rotortrade 2026-10-14 | my error | scope: always
 
 ## DDCSummary panel count must equal DDC List rows - network rows included
 - **Rule:** In every audit compare the DDC names in DDCSummary with DDC List column A. Rehab final:
