@@ -193,7 +193,7 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
 - **Rule:** One "Integration" row, 7 SP, protocol in P; no DI/AI/AO/DO and no hardwired devices.
   Keeps network panels small (~29 units per panel at 250 incl. 20% spare) and stops TX-I/O pricing.
   VAV rows also carry the unitary controller + room unit as device rows (Al Moosa: DXR1.M09PLZ-112 +
-  QMX1.M34H - confirm per project). FCU: controller through RoomUnits/FCUs (see F).
+  QMX1.M34H - confirm per project). FCU: RDF440BN room thermostat device row (see F).
 - **Source:** Al Moosa 2026-10-02 | GTS standard | scope: always | "we always take them as integration point"
 
 ## Field devices: only where drawn, house-standard models, M = total quantity
@@ -318,12 +318,27 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   Pricelist row at UP 0 (see G).
 - **Source:** Al Moosa 2026-10-05 | GTS standard | scope: always | "I PUT ONLY 8 WORKSTATION AND I FORGET LASER"
 
-## FCU controllers through RoomUnits/FCUs - never a hand-typed model
-- **Rule:** FCU device = `[FCU Controller]`; set Options B13 to the real protocol; `LoadRoomUnits`,
-  choose the controller from the dropdown. The FCUs sheet prices controllers only. Never price two
-  controllers on one FCU (RDF440BN is complete; DXR2 needs a QMX3). Al Moosa: RDF440BN alone, with a
-  Cover Page note that it replaces the BOQ's "IP unitary controller".
-- **Source:** Al Moosa 2026-10-05 | GTS standard (path) / this project (RDF440BN) | scope: always (path)
+## FCU / VAV controllers are device rows in the IOSummary block - never `[FCU Controller]`
+- **Rule:** FCU block = Integration row 7 SP (`BACNET/MSTP`) + a device row `[Room Thermostat]
+  [Modulating]` -> RDF440BN (complete controller, M = qty). VAV block = Integration 7 SP
+  (`BACNET/IP`) + device rows `[VAV] [IP Unitary Controller] [DXR1]` -> DXR1.M09PLZ-112 and
+  `[Room] [Thermostat] [QMX1]` -> QMX1.M34H (add both to FieldDevices if the template lacks them -
+  both are in the Pricelist). Never use `[FCU Controller]` / `[VAV Controller]` (they point to the RU
+  Selection Sheet; RoomUnits is empty in every finished GTS project, so nothing gets priced). Never
+  price two controllers on one FCU. Al Moosa: RDF440BN with a Cover note that it replaces the BOQ's
+  "IP unitary controller".
+- **Source:** Al Moosa final workbook (RDF440BN x458, DXR1 + QMX1 x691 as IOSummary devices, RoomUnits empty), RAPEH BOQ (RDF440BN x10), Rotortrade 2026-10-14 estimator removed [FCU Controller] | my error (old rule said RoomUnits path - did not match the finished workbooks) | scope: always | "i think in no place we add controller of FCU ... recheck another project"
+
+## VFDs are not priced
+- **Rule:** Speed-control AO rows carry no `[Variable Frequency Drive]` device; leave the VFDs sheet
+  empty and add the Cover note "VFDs by mechanical contractor".
+- **Source:** Al Moosa, Rehab, RAPEH, Qiddiya, YALJ (no VFD in any final BOQ), Rotortrade 2026-10-14 estimator removed them | GTS practice (evidence across 5 projects) | scope: always
+
+## Rotortrade: no valves, no meter integration
+- **Rule:** Rotortrade Helipark prices no control valves (coil or isolation) and no meter integration
+  (digital energy meters, water supply meter, MV/MRMU meter SP). Do not generalise - Al Moosa priced
+  coil valves (LEARNED C "Valves").
+- **Source:** Rotortrade 2026-10-14 | estimator instruction (reason not given) | scope: this project | "I DON'T WANT VLAVE AND METERS"
 
 ## One head-end server for the whole campus unless the tender says otherwise
 - **Rule:** Read the client BOQ and risers for the server line. Al Moosa: ONE fault-tolerant
