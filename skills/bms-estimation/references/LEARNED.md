@@ -328,6 +328,7 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   price two controllers on one FCU. Al Moosa: RDF440BN with a Cover note that it replaces the BOQ's
   "IP unitary controller".
 - **Source:** Al Moosa final workbook (RDF440BN x458, DXR1 + QMX1 x691 as IOSummary devices, RoomUnits empty), RAPEH BOQ (RDF440BN x10), Rotortrade 2026-10-14 estimator removed [FCU Controller] | my error (old rule said RoomUnits path - did not match the finished workbooks) | scope: always | "i think in no place we add controller of FCU ... recheck another project"
+- **Rotortrade override (this project):** estimator wants controller + thermostat on every FCU -> `[FCU] [IP Unitary Controller] [DXR2]` -> DXR2.E10-101A + `[Room] [Thermostat] [QMX3]` -> QMX3.P34, FCU SP = `BACNET/IP`, Options B13 = BACNET/IP. Evidence checked: no previous workbook had a controller + thermostat pair on FCUs (Al Moosa / Ajyad RDF440BN only) - ask on the next project which pattern applies. Source: Rotortrade 2026-10-14 | estimator instruction | scope: this project | "IN THE PREVIOUS PROJECT THE FCU HAVE CONTROLER WITH THE THERMO STATE"
 
 ## VFDs are not priced
 - **Rule:** Speed-control AO rows carry no `[Variable Frequency Drive]` device; leave the VFDs sheet
