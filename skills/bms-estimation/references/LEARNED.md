@@ -196,6 +196,14 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   QMX1.M34H - confirm per project). FCU: controller through RoomUnits/FCUs (see F).
 - **Source:** Al Moosa 2026-10-02 | GTS standard | scope: always | "we always take them as integration point"
 
+## Chillers are integration points only - no hardwired chiller points
+- **Rule:** A chiller block gets one Integration row (SP from the chiller controller / CPM over BACnet,
+  protocol in P) carrying the point-list software points - no hardwired chiller DI/DO/AI (enable, run,
+  fault, CHW temps, flow) even when the point list shows them as volt-free contacts. Plant points that
+  are not the chiller itself (isolation / motorized valves, PICV, BTU, DPT, header and tank temps)
+  stay hardwired on the plant / RIO panel.
+- **Source:** RDC108 AI Data Center 2026-10-22 | GTS standard ("like before") | scope: always | "we take it as integration for chiller we don't take chiller point like before"
+
 ## Field devices: only where drawn, house-standard models, M = total quantity
 - **Rule:** Device only where the instrument is drawn. Models GTS uses: fan DPS QBM81-5, filter DPS
   QBM81-10, duct T&RH QFM2120, duct T QAM2112.040, duct static QBM3020-5, duct AQ QPM2100, water temp
@@ -268,6 +276,16 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   panels named `DDCP-<bldg>-<level>-<next nn>`; equipment names say "via DDC". Keep a drawn-tag ->
   DDCP map (`panel_rename.txt`, project data) so `ddc_build.ps1` applies it.
 - **Source:** Al Moosa 2026-10-06 | GTS standard | scope: always | "we use just PXC not PLC"
+- **Confirmed again:** RDC108 2026-10-22 - remote IO panels (one per chiller, ring loop) priced as DDC
+  panels; chiller plant managers (CPM, drawn as redundant PLC pair) kept as PXC panels. "the rio is
+  like take it ddc instead"
+
+## DCIM is not GTS scope - interfaces only
+- **Rule:** Data-center tenders often draw a DCIM system (DDC-DCIM panels, rack PDU / rack T&RH
+  monitoring, DCIM servers + workstation, CFD / capacity software) and may say "complete scope by the
+  contractor". GTS does not supply DCIM: price no DCIM panels, servers or workstation; keep only the
+  BMS->DCIM / EPMS->DCIM interface (SP / integration) and add a Cover exclusion note.
+- **Source:** RDC108 AI Data Center 2026-10-22 | GTS standard | scope: always | "data center i m we don't work with that"
 
 ## DDC List template limits - extend the design past them
 - **Rule:** Formatted only B:DQ x 81 rows; `GenerateEquipmentForDDCList` scans IOSummary to row 3000;
@@ -429,6 +447,12 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   the workbook (and sheet) before every macro and verify `ActiveWorkbook.FullName`; keep only one
   estimation workbook open while macros run (a chain once regenerated the wrong file).
 - **Source:** Al Moosa 2026-10-06 | my error | scope: always
+
+## COM attach needs Windows PowerShell 5.1, not pwsh 7
+- **Rule:** `[Runtime.InteropServices.Marshal]::GetActiveObject` does not exist in PowerShell 7
+  (.NET Core) - the attach fails as "workbook not attached" while Excel is open fine. Run every COM
+  script with `powershell.exe -NoProfile -ExecutionPolicy Bypass -File <script.ps1>` (5.1).
+- **Source:** RDC108 2026-10-22 | my error | scope: always
 
 ## When Excel stops answering
 - **Rule:** "Call was rejected by callee", "Unable to set Calculation", or `Workbooks.Count = 0` on a
