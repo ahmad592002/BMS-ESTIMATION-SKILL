@@ -103,6 +103,17 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   "B1-GF-01-18 i think this are 18 equ"; estimator set SP 30, DBWP 9, IRRP 4, FIP 6, RCP 10,
   lighting DB 22, MDB 3, EAF 36, PEAF 12 + PFAF 12
 
+## Sensors, meters and dampers are field devices - never EquipmentList rows
+- **Rule:** The EquipmentList holds equipment and places, not instruments. A sensor (T&RH, DPT, DP
+  sensor, CO, CO2, off-gas, temperature), a meter (BTU, water, power) or a damper goes as a field
+  device inside the IOSummary block of the equipment or room it serves - like the sensors of an AHU.
+  Room sensors with no equipment (data halls, power-module rooms, IT / electrical rooms, offices,
+  loading bay) get a room / area row ("Data Hall (DH1..DH4) - aisle T&RH, DPT") whose qty = number of
+  rooms, and the sensors are its devices. Client-BOQ sensor totals are reconciled in Phase 2 against
+  the device column M, not as EquipmentList quantities. Panels (fuel controllers, CPM, RIO) are DDC
+  List rows, not equipment.
+- **Source:** RDC108 AI Data Center 2026-10-22 | GTS standard ("bl 3ada") | scope: always | "ma mnhtt l sensors hene bikun bl field device ... kl wehda btkun bi mhl mtl l ahu"
+
 ## Equipment comes from the drawings when the client BOQ has no equipment counts
 - **Rule:** Client BOQs often price only controllers, devices and LS items. Build the EquipmentList
   from the BMS risers / schematics (per-tag takeoff workbook: tag -> panel -> room -> interface), then
