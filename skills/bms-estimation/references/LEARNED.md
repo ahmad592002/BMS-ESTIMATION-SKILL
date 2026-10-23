@@ -269,6 +269,24 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   DDCP map (`panel_rename.txt`, project data) so `ddc_build.ps1` applies it.
 - **Source:** Al Moosa 2026-10-06 | GTS standard | scope: always | "we use just PXC not PLC"
 
+## BACnet/IP and Modbus TCP/IP points are not counted in DDC generation
+- **Rule:** BACnet/IP equipment (CRAH, CRAC, FAHU, VRF gateway, fire alarm, pre-action / VESDA, leak
+  detection, access control, CCTV, lifts, chiller BACnet part, off-gas systems, emergency lighting) is
+  integrated directly by the Desigo CC server over IP: put it on one virtual DDC List row per building
+  `SRV-<bldg>-BACNET-IP` (exempt from the 250 cap), clear its controller list and enclosure in
+  DDCSummary - no DDC / network controller is priced for it. Mixed equipment gets a companion row
+  "BACnet/IP - <equipment>" carrying only its BACnet/IP points. The points still count for the BA
+  licence (Workstation SUMIF on P). DDC-resident software points tagged BACnet/IP (setpoints, derived
+  high/low alarms, panel comm-loss) stay on their DDC.
+- **Modbus TCP/IP is treated the same way:** IP-native Modbus equipment (UPS, battery monitoring,
+  capacitor bank, harmonic filter, generator, transformer, RMU, MV / MDB / STS / EMDB, breakers read
+  through an electrical PLC, PQM, busway via Modbus TCP gateways, RS485 devices behind Modbus TCP
+  converters) goes on `SRV-<bldg>-MODBUS-TCP`, no DDC. A board mixing an RS485 meter loop with PLC
+  breaker status is split: "<board> - power meter on RS485 loop (Modbus RTU)" stays on a DDC,
+  "Modbus TCP - <board> Breaker Status" goes to the server row. Modbus RTU (RS485 meters, BTU, VFD,
+  sensor loops) and MS/TP integrations still load DDCs.
+- **Source:** RDC108 AI Data Center 2026-10-23 | estimator instruction (reason not given yet) | scope: this project until confirmed | "every backnetIP don't count it in ddc generation" + "the modbus tcp ip not need ddc"
+
 ## DDC List template limits - extend the design past them
 - **Rule:** Formatted only B:DQ x 81 rows; `GenerateEquipmentForDDCList` scans IOSummary to row 3000;
   `ClearDDCList` clears B:DU; `FillDDCEquipmentInCell` reads 150 columns. Past these, write the list
