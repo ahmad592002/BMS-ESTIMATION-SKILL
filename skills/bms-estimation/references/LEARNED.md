@@ -154,6 +154,16 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   The PDF text layer is usually scrambled - read the pages as images (pdftoppm -r 130).
 - **Source:** Rehab Oasis 2026-10-07 | estimator instruction (reason not given) | scope: this project, candidate for always | "just take the io and put it from data to excel as it's don't think in it if set if not"
 
+## Consultant point-list tables: parse by word coordinates, all three mark styles
+- **Rule:** Tabular point lists (QTY | NI | 0-10VDC | 4-20mA | AI | DI | AO | DO | S/W | REMARKS)
+  have a usable text layer but plain `pdftotext` scrambles the columns. Use MiKTeX poppler
+  `pdftotext -bbox` (the mingw xpdf build has no bbox), group words into rows by y (+-3 pt) and map
+  each mark to the nearest column header by x. Marks come as `X`, as DIGITS (the point count - e.g.
+  `2` under AI for a T&RH, `2` per row for 2 fire pumps) and as the text `S/W`; some sit just below
+  their row. Count from AI/DI/AO/DO/S/W only - 0-10VDC / 4-20mA only state the signal. A header row
+  (shaded) carries the system QTY. Check every system's sum against the rendered page before using it.
+- **Source:** RDC108 AI Data Center 2026-10-22 | my method (first parse missed digit and S/W marks) | scope: always
+
 ## Point names: written out in full, no drawing shorthand
 - **Rule:** Never leave consultant abbreviations as point names: S.A./R.A./E.A./F.A. -> SUPPLY /
   RETURN / EXHAUST / FRESH AIR; PDS -> ... AIR FLOW STATUS (DIFFERENTIAL PRESSURE SWITCH); VSD/VFD
@@ -269,6 +279,13 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   DDCP map (`panel_rename.txt`, project data) so `ddc_build.ps1` applies it.
 - **Source:** Al Moosa 2026-10-06 | GTS standard | scope: always | "we use just PXC not PLC"
 
+## Fuel systems are not GTS scope - exclude completely
+- **Rule:** Fuel oil systems (fuel controllers / fuel control panels, transfer / return / supply pumps,
+  bulk and day tanks, fill-pipe valves, polishing, fuel leak detection) are not supported by GTS: price
+  no fuel controllers, no fuel points and no fuel integration, even when the BMS BOQ lists "fuel
+  controller" or "fuel system integration" lines; add a Cover exclusion note.
+- **Source:** RDC108 AI Data Center 2026-10-23 | GTS standard | scope: always | "we don't support these" -> "Exclude fuel completely"
+
 ## DDC List template limits - extend the design past them
 - **Rule:** Formatted only B:DQ x 81 rows; `GenerateEquipmentForDDCList` scans IOSummary to row 3000;
   `ClearDDCList` clears B:DU; `FillDDCEquipmentInCell` reads 150 columns. Past these, write the list
@@ -280,6 +297,24 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
 ---
 
 ## E. DDCSummary / DDCFullSummary (Phases 4-5)
+
+## GenerateDDCSummary reads DDC List rows 5..200 only - append the rest
+- **Rule:** With more than 196 DDC List rows the macro silently stops (RDC108: 196 of 317 blocks). The
+  blocks are self-contained (A = qty, B = equipment name, C:L = name lookups into IOSummary, TOTAL /
+  SPARE / WITH SPARE / PROVIDED formulas), so append the missing panels BEFORE selecting controllers:
+  copy the first clean block (pitch 33 rows, 23 equipment rows), write the panel name in B and the
+  qty / name pairs from the DDC List, then run SelectControllersForSheet once over all blocks
+  (`append_ddcs.ps1`). Gate: DDCSummary blocks == DDC List rows and TOTAL sums == IOSummary.
+- **Source:** RDC108 AI Data Center 2026-10-22 | template limit found | scope: always
+
+## SP-heavy panels: the selection under-sizes - swap by total capacity
+- **Rule:** PROVIDED SP = station total points (Controllers!I: PXC4.E16-2 80, PXC5.E24 120,
+  PXC7.E400S 100, E400M 250, PXC5.E003 500) minus the hardwired points provided. Panels whose demand is
+  mostly SP get a compact that cannot hold it. Swap in column Q: need <= 120 total -> PXC5.E24 (same
+  modules); more -> PXC7.E400M + TX-I/O for the IO the compact carried onboard (TXM1.8U is universal:
+  AI + AO) + TXS1.12F10 + TXS1.EF10. Network rows correctly get PXC5.E003 (500 SP). Re-check every
+  panel PROVIDED >= WITH SPARE afterwards; log the overrides (GenerateDDCSummary wipes them).
+- **Source:** RDC108 AI Data Center 2026-10-22 | my check (130 of 317 panels short) | scope: always
 
 ## SelectControllersForSheet works on the ACTIVE sheet
 - **Rule:** Activate `DDCSummary` (or DDCFullSummary) before `SelectControllersForSheet`, then check
@@ -309,6 +344,15 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   line; above -> deduct 2000 and ladder 1000/500/100. `SelectBALicenses` over-adds (deduction guarded
   by `>= 2000`; Integer rounding) - read and correct its output every time.
 - **Source:** SDA 2026-09-28 | GTS standard | scope: always
+
+## GenerateWorstation overflows above 32,767 BA points - write the parts list by hand
+- **Rule:** The macro holds Total BA in a VBA Integer: above 32,767 it stops with "Run-time error 6:
+  Overflow" and the dialog blocks Excel (Workbooks.Count = 0 over COM). Do not run it on big jobs;
+  write Workstation F:G yourself (Al Moosa format): per Desigo CC system CMD.06 + CCA-STD-FSET, BA
+  ladder CCA-5000 / 1000 / 100-BA covering BA x (1 + Options spare) - pick the cheaper mix (one
+  1000-BA beats nine 100-BA) - CCA-1-CL per client, then PCs, monitors, printers, UPS from the BOQ.
+  One system per building when the BOQ prices a server allowance per building.
+- **Source:** RDC108 AI Data Center 2026-10-23 | template limit found (40,094 BA) | scope: always
 
 ## Workstation hardware follows the client BOQ head-end lines
 - **Rule:** The template macro sets licences only; PCs, monitors, printers, UPS default to 1 and there
@@ -430,6 +474,16 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   estimation workbook open while macros run (a chain once regenerated the wrong file).
 - **Source:** Al Moosa 2026-10-06 | my error | scope: always
 
+## Big workbooks: run every step in a private hidden Excel instance
+- **Rule:** On a large estimation (300+ panels, ~20k rows of INDIRECT lookups in DDCSummary /
+  DDCFullSummary) the user's visible Excel crashed twice right after a save. Close the user's Excel,
+  then run each step with `run_steps.ps1` (New-Object Excel.Application, Visible false, no add-ins,
+  AutomationSecurity 1, open -> steps -> save -> quit; step scripts take `$global:XL`). Clear the stale
+  DDCSummary / DDCFullSummary before regenerating upstream so recalcs stay fast (8.4 MB -> 1.9 MB).
+  In a private instance `CutCopyMode` cannot be set - wrap it in try. GenerateFullDDCSummary on 309
+  panels takes ~90 minutes - run it last, in the background.
+- **Source:** RDC108 AI Data Center 2026-10-23 | my method after two crashes | scope: always
+
 ## When Excel stops answering
 - **Rule:** "Call was rejected by callee", "Unable to set Calculation", or `Workbooks.Count = 0` on a
   visible window = a cell is in edit mode or a dialog is open: ask the user to press Enter/Esc, don't
@@ -445,6 +499,9 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
     one-letter loop variable that matches another variable; use `$key`, `$eqName`, `$rowIx`.
   - `[ordered]@{228='x'}` indexed with an int returns by POSITION -> null -> blank cells written (20
     point names blanked, 2026-10-06). Use arrays of pairs or string keys; refuse to write empty values.
+  - A 2-D index inside a method argument (`[math]::Abs([double]$v[$t, ($k - 5)] * $q)`) is a 5.1
+    PARSE error ("MissingEndSquareBracket") - read the cells into variables first. Parse-check every
+    new script with `[Parser]::ParseFile` before running it on the workbook (RDC108 2026-10-22).
   - `$host` is reserved; `cat` is Get-Content; index as `$v[($r+2),2]`, not `$v[$r+2,2]`; `"$r:"`
     needs `"${r}:"`; `{0,>10}` is invalid; cast every value written to a cell (`[string]`/`[double]`).
     (`$v[$r+2,1]` -> "op_Addition" error, hit again at Rehab 2026-10-07.)
