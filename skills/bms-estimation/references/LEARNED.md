@@ -78,6 +78,19 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   EquipmentList F. Assumed SP counts and assumed valve/damper sizes are ALWAYS yellow.
 - **Source:** Al Moosa 2026-10-01 | GTS standard | scope: always | "no every thing yellow like that"
 
+## Mark in RED everything not common compared with previous GTS projects
+- **Rule:** Follow the previous projects' steps and standards (this file); wherever the current project
+  departs from them, mark it red - light red fill 13551615 + dark red font 393372 - with a one-line
+  "NOT COMMON: <what we did> - <what previous projects did>" in the same reason column as yellow
+  (EquipmentList F, IOSummary Q, Breakdown K). Typical red items: an integration architecture other
+  than DDC / network rows, a controller rule the estimator overrode, items priced 0 / by others that
+  earlier jobs priced, commercial values off GTS history (margin, Siemens discount, gross margin),
+  extra servers, the Cover carry-over block. Do it with a re-runnable script after the last
+  regeneration (RDC108 `red_marks.ps1`), list the items in the state file and the final report, and
+  remind the estimator to clear red (and yellow) before sending. Yellow still means "not 100% from the
+  tender"; a cell can be both - red wins.
+- **Source:** RDC108 AI Data Center 2026-10-26 | estimator instruction | scope: always (candidate - confirm) | "follow the steps in the previous project but here if you find somthing not comman mention it by red"
+
 ---
 
 ## B. Quantities (Phase 1)
@@ -285,7 +298,13 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   breaker status is split: "<board> - power meter on RS485 loop (Modbus RTU)" stays on a DDC,
   "Modbus TCP - <board> Breaker Status" goes to the server row. Modbus RTU (RS485 meters, BTU, VFD,
   sensor loops) and MS/TP integrations still load DDCs.
-- **Source:** RDC108 AI Data Center 2026-10-23 | estimator instruction (reason not given yet) | scope: this project until confirmed | "every backnetIP don't count it in ddc generation" + "the modbus tcp ip not need ddc"
+- **Before moving anything to the server, check two things:** (1) the EPMS spec - data-center specs
+  (RDC108 25 00 02 2.5) say "the Vendor EPMS shall connect to the PQM devices via serial Modbus only,
+  never Ethernet": every PQM / power meter stays Modbus RTU on its DDC, even on a board whose breakers
+  go TCP; (2) the client BOQ wording - "Rodent repellent modbus/RTU" means RTU on a DDC even when the
+  drawing adds an RS485-to-IP converter. RDC108 first pass put the MDB PQM (250 SP per building) and
+  the rodent system on the server; the recheck moved them back.
+- **Source:** RDC108 AI Data Center 2026-10-23 | estimator instruction (reason not given yet) | scope: this project until confirmed | "every backnetIP don't count it in ddc generation" + "the modbus tcp ip not need ddc" ; PQM / BOQ-wording check: RDC108 recheck 2026-10-26 | my error | scope: always
 
 ## DDC List template limits - extend the design past them
 - **Rule:** Formatted only B:DQ x 81 rows; `GenerateEquipmentForDDCList` scans IOSummary to row 3000;
@@ -294,6 +313,12 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   crosshair CF and the three row-4 Assigned-vs-Total CFs to the last column (`full_chain.ps1` does it).
   Rebuild CFs with delete + Add (`ModifyAppliesToRange` crashed Excel).
 - **Source:** Al Moosa 2026-10-02 | GTS standard | scope: always | "the design not applicable on all column"
+- **Hard limit - 150 equipment columns:** `GenerateDDCSummary` silently drops every equipment column
+  past 150 (RDC108 recheck: 152 rows -> B2 STS / EMDB 62 SP and B2 emergency lighting 4 SP missing
+  from DDCSummary, no error). Keep the EquipmentList <= 150 rows (merge companion rows with the same
+  qty and destination, e.g. SMDB + DB breaker status) and gate it in the DDC script; after
+  GenerateDDCSummary compare every panel's TOTAL with its DDC List row, not only the grand total.
+- **Source (limit):** RDC108 recheck 2026-10-26 | my error | scope: always
 
 ---
 
@@ -447,6 +472,21 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   the workbook (and sheet) before every macro and verify `ActiveWorkbook.FullName`; keep only one
   estimation workbook open while macros run (a chain once regenerated the wrong file).
 - **Source:** Al Moosa 2026-10-06 | my error | scope: always
+
+## PowerShell 5.1 reads BOM-less scripts as ANSI - no literal non-ASCII text in COM scripts
+- **Rule:** A script saved as UTF-8 without BOM that writes "•", "–", "…" or Arabic into Excel puts
+  mojibake in the cells ("•" became "â€¢" on 14 RDC108 Cover lines). Build such characters from
+  codes (`[char]0x2022`) or save the script with a BOM. After writing client-facing text, scan the
+  sheet for "â€" / "Ã" before reporting.
+- **Source:** RDC108 recheck 2026-10-26 | my error | scope: always
+
+## Run the IOSummary fill in its own PowerShell session
+- **Rule:** When an EquipmentList write and the IOSummary fill run in one PowerShell 5.1 session, the
+  COM adapter starts refusing `Range.Value2 = object[,]` ("Unable to cast Object[,] / Double to
+  String"), every block falls back and Excel ends with 0x800A01A8. RDC108: 4 failures, all with the
+  EquipmentList step first; every run that started with the IOSummary fill passed. Run EquipmentList
+  in one `powershell.exe` call and IOSummary + everything after in the next.
+- **Source:** RDC108 recheck 2026-10-26 | my error | scope: always
 
 ## When Excel stops answering
 - **Rule:** "Call was rejected by callee", "Unable to set Calculation", or `Workbooks.Count = 0` on a
