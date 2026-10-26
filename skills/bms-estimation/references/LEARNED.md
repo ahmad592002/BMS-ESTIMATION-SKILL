@@ -247,6 +247,15 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   applying LEARNED C "Valves".
 - **Source:** Rehab Oasis 2026-10-08 | estimator's final BOQ (reason not given) | scope: this project
 
+## Plant with its own controller -> BACnet IP integration only
+- **Rule:** When a plant has its own controller (chilled water plant run by a chiller plant manager
+  / PLC with RIO), price it as integration only: every point the point list gives for the plant
+  (chiller, integral pump, storage tank, valves, PICV, DPT, BTU, header) becomes 1 SP `BACNET/IP`, no
+  hardwired DI/AI/AO/DO and no field devices on those rows. Keep the point names. Ask whether the
+  plant controller panels (CPM / RIO) are still in the BMS price.
+- **Source:** RDC108 AI Data Center 2026-10-26 | estimator instruction | scope: this project, candidate for always | "chilled water only ip integration because it have controller own"
+
+
 ## Tag every software point's protocol in column P
 - **Rule:** Workstation counts SP with `SUMIF(IOSummary!P:P, <label>, L:L)`; labels exactly `MODBUS`,
   `BACNET/IP`, `BACNET/MSTP`, `MBUS`, `KNX`. "Other" must read 0.
@@ -262,6 +271,16 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   Split overloaded panels into separate panels `<drawn name>-1`, `-2`... filled floor by floor.
 - **Source:** SDA 2026-09-28, Al Moosa 2026-10-02 | GTS standard (250 cap) | scope: always; the
   `-1/-2` naming and network-panels-per-floor were Al Moosa choices - confirm on the next project
+
+## Modbus / BACnet IP points are not counted on a DDC - integration rows
+- **Rule:** DDC load (and the 250 gate) = hardwired DI/AI/AO/DO + BACnet MSTP SP only. Equipment that
+  talks Modbus or BACnet IP straight to the BMS / EPMS server goes on integration rows
+  (`INT-<bldg>-CHW PLANT / BMS SERVER / EPMS SERVER`) so Assigned == Total still holds, and loads no
+  controller; in Phase 4 those rows get no controller. Open: whether Modbus RTU (RS485 meter loops,
+  PQM - spec says serial only, sensor loops) stays on the DDC as the unmerged branch
+  `learn/rdc108-ip-integration-no-ddc` says.
+- **Source:** RDC108 AI Data Center 2026-10-26 | estimator instruction | scope: this project, candidate for always | "don't take modbus ip in point counting in the ddc list"
+
 
 ## GTS uses PXC, never PLC - every panel is a DDCP
 - **Rule:** Panels drawn as PLC / RIO (chiller plant manager, MV/LV PLC, remote IO) are priced as PXC
