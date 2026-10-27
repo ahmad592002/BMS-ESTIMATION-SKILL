@@ -154,6 +154,21 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   The PDF text layer is usually scrambled - read the pages as images (pdftoppm -r 130).
 - **Source:** Rehab Oasis 2026-10-07 | estimator instruction (reason not given) | scope: this project, candidate for always | "just take the io and put it from data to excel as it's don't think in it if set if not"
 
+## Never use "~" in EquipmentList / IOSummary names
+- **Rule:** Write tag ranges as `CH-01..03`, never `CH-01~03`. Excel lookups treat `~` as an escape
+  character, so GenerateDDCSummary silently finds no IO for those rows (Rotortrade: DDCSummary had 315
+  DI instead of 722, VAV SP missing, BOQ short on modules). After GenerateDDCSummary always check
+  DDCSummary TOTAL rows == IOSummary grand total.
+- **Source:** Rotortrade 2026-10-14 | my error | scope: always
+
+## IO-list points not shown on any schematic become SP, not hardwired
+- **Rule:** When the consultant IO list gives more points than the control schematic, keep the drawn
+  points hardwired and convert the unnamed extra (alarms, statuses, commands) to software points on an
+  integration row (protocol in P, G yellow, reason in Q). Never pad with unnamed "Additional ... (per
+  IO list)" hardwired rows. Check the schematic's own point-count table first - it may prove the IO
+  list wrong (Rotortrade MH-71002: plant 18 DI / 9 DO / 2 AI vs IO list 24 DI / 12 DO per chiller).
+- **Source:** Rotortrade 2026-10-15 | estimator instruction (reason not given) | scope: this project, candidate for always | "the point not have schematique add them to the sp instead of physical"
+
 ## Point names: written out in full, no drawing shorthand
 - **Rule:** Never leave consultant abbreviations as point names: S.A./R.A./E.A./F.A. -> SUPPLY /
   RETURN / EXHAUST / FRESH AIR; PDS -> ... AIR FLOW STATUS (DIFFERENTIAL PRESSURE SWITCH); VSD/VFD
@@ -193,7 +208,7 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
 - **Rule:** One "Integration" row, 7 SP, protocol in P; no DI/AI/AO/DO and no hardwired devices.
   Keeps network panels small (~29 units per panel at 250 incl. 20% spare) and stops TX-I/O pricing.
   VAV rows also carry the unitary controller + room unit as device rows (Al Moosa: DXR1.M09PLZ-112 +
-  QMX1.M34H - confirm per project). FCU: controller through RoomUnits/FCUs (see F).
+  QMX1.M34H - confirm per project). FCU: RDF440BN room thermostat device row (see F).
 - **Source:** Al Moosa 2026-10-02 | GTS standard | scope: always | "we always take them as integration point"
 
 ## Field devices: only where drawn, house-standard models, M = total quantity
@@ -255,6 +270,23 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   plant controller panels (CPM / RIO) are still in the BMS price.
 - **Source:** RDC108 AI Data Center 2026-10-26 | estimator instruction | scope: this project, candidate for always | "chilled water only ip integration because it have controller own"
 
+## Integration-only plant still gets its BMS field devices
+- **Rule:** Making a plant IP integration only changes the POINTS, not the SENSORS. Keep a field device on
+  every point that needs a physical sensor the BMS supplies (riser shows it on the CPM / RIO, or the Div 25
+  BOQ lists it): header / tank temperatures (immersion), tank level, chiller flow DP switch, pit float
+  switch. Leave out only what the BOQ gives Div 23 (valves, BTU, flow meters, CHW DPT) and sensors inside
+  packages (chiller internals, FAHU controller, pump-panel alarms). Before presenting Phase 2, compare
+  every Div 25 device BOQ item with the IOSummary device totals.
+- **Source:** RDC108 AI Data Center 2026-10-27 | estimator correction | scope: always (candidate) | "many point you don't add to it his field device like tempreture of chiller head and bottom"
+
+## Device count: BOQ vs points -> keep the highest; every status point gets its device
+- **Rule:** Audit every hardwired point against column O before presenting Phase 2/5. Where the Div 25
+  BOQ quantity and the point-derived device count differ, keep the HIGHER (RDC108: immersion 352 vs BOQ
+  144, level 64 vs 8, DPS 106+56 vs 18 - all kept). A damper open/close status DI with no device gets an
+  actuator with end switches (GCA126.1E via the DamperActuators buttons, signal ON/OFF), smoke dampers
+  included, yellow "may come with the damper". Field switches (DPS, flow, float, end switch) are in
+  scope; network (Ethernet) switches are not - core / edge / industrial switches excluded.
+- **Source:** RDC108 AI Data Center 2026-10-27 | estimator decision | scope: this project, candidate for always | "keep highest count" / "internet switch [out of scope] all these above are in scop"
 
 ## Tag every software point's protocol in column P
 - **Rule:** Workstation counts SP with `SUMIF(IOSummary!P:P, <label>, L:L)`; labels exactly `MODBUS`,
@@ -272,15 +304,21 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
 - **Source:** SDA 2026-09-28, Al Moosa 2026-10-02 | GTS standard (250 cap) | scope: always; the
   `-1/-2` naming and network-panels-per-floor were Al Moosa choices - confirm on the next project
 
-## Modbus / BACnet IP points are not counted on a DDC - integration rows
-- **Rule:** DDC load (and the 250 gate) = hardwired DI/AI/AO/DO + BACnet MSTP SP only. Equipment that
-  talks Modbus or BACnet IP straight to the BMS / EPMS server goes on integration rows
-  (`INT-<bldg>-CHW PLANT / BMS SERVER / EPMS SERVER`) so Assigned == Total still holds, and loads no
-  controller; in Phase 4 those rows get no controller. Open: whether Modbus RTU (RS485 meter loops,
-  PQM - spec says serial only, sensor loops) stays on the DDC as the unmerged branch
-  `learn/rdc108-ip-integration-no-ddc` says.
-- **Source:** RDC108 AI Data Center 2026-10-26 | estimator instruction | scope: this project, candidate for always | "don't take modbus ip in point counting in the ddc list"
+## DDC List headers come from the Excel button, not from a script
+- **Rule:** Generate the DDC List equipment headers (row 1 index, row 2 names, row 3 Total) with the
+  sheet's button `GenerateEquipmentForDDCList` (run via the macro runner). Only the panel rows (A5+ and
+  their quantities) are written by script. The button reads IOSummary A1:A3000 only: blocks whose qty
+  cell lies below row 3000 need their headers added by script - say so and verify every column.
+- **Source:** RDC108 AI Data Center 2026-10-27 | estimator instruction | scope: always (candidate) | "you should use the ddc generate in the excel button"
 
+## Only IP equipment needs no DDC - everything else is counted on a DDC
+- **Rule:** DDC load (and the 250 gate) = hardwired DI/AI/AO/DO + BACnet MSTP SP + Modbus RTU / RS485
+  SP. Only IP equipment (BACnet IP, Modbus TCP/IP - incl. RS485 devices behind a Modbus TCP gateway,
+  e.g. busway) goes on integration rows (`INT-<bldg>-CHW PLANT / BMS SERVER / EPMS SERVER`) so
+  Assigned == Total still holds; those rows get no controller in Phase 4. Decide RTU vs TCP per family
+  from the EPMS schematic link labels, the spec (PQM serial only) and the BOQ wording. Panels over
+  250 incl. spare split into `<drawn name>-1`, `-2`.
+- **Source:** RDC108 AI Data Center 2026-10-26/27 | estimator instruction | scope: this project, candidate for always | "don't take modbus ip in point counting in the ddc list" -> "the only thing don't need it is the ip all other need ddc panel"
 
 ## GTS uses PXC, never PLC - every panel is a DDCP
 - **Rule:** Panels drawn as PLC / RIO (chiller plant manager, MV/LV PLC, remote IO) are priced as PXC
@@ -306,6 +344,27 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   controllers. (`run_macro.ps1 -Sheet DDCSummary` handles it.)
 - **Source:** Al Moosa 2026-10-02 | my error | scope: always
 
+## Check every panel PROVIDED >= TOTAL WITH SPARE after SelectControllersForSheet
+- **Rule:** The selection picks on hardware points; a panel with many SP can get a PXC4.E16-2 whose SP
+  capacity is too small (Rotortrade B03 60 SP vs 42, SITE 72 vs 48). Swap the controller cell (DDCSummary
+  column Q) to PXC5.E24 (16 UIO + 2 DI + 6 RO, 120 SP - strictly more than PXC4) and recheck. Controllers!L
+  follows column Q (SUMIFS), so the BOQ picks it up on the next StartBOQGeneration.
+- **Source:** Rotortrade 2026-10-14 | my error (gate not checked before BOQ) | scope: always
+
+## Address keys must cover every TX-I/O module on a panel
+- **Rule:** After SelectControllersForSheet, a panel with more than 24 TX-I/O modules needs TXA1.K24 (1-24)
+  AND TXA1.K-48 (25-48). The macro gave Rotortrade DDC-B01-RF-02 (25 modules) only the K-48. Add the
+  missing key on a free controller row in the DDCSummary block (column Q + R), then BOQ + pf_refill. Manual
+  DDCSummary edits are wiped by GenerateDDCSummary - log them in the state file.
+- **Source:** Rotortrade 2026-10-14 audit | my error (not checked) | scope: always
+
+## V04 FieldDevices already holds room-unit rows by part number (rows ~90-97, column A blank)
+- **Rule:** QMX3.P34, DXR2.E09, DXR1.M09PLZ-112, QMX1.M34H, RDF600KN, RDF460BN, QPM1104 sit in hidden
+  rows with a blank description. To use one, write the description into column A of THAT row - never add
+  a second row with the same part number (both SUMIFS count it and the BOQ lists the device twice:
+  Rotortrade DXR1 + QMX1 x47 duplicated, ~58k SAR).
+- **Source:** Rotortrade 2026-10-14 | my error | scope: always
+
 ## DDCSummary panel count must equal DDC List rows - network rows included
 - **Rule:** In every audit compare the DDC names in DDCSummary with DDC List column A. Rehab final:
   DDC List 24 rows (21 panels + 3 EMS network rows), DDCSummary 21 - the network rows were added after
@@ -328,6 +387,12 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   line; above -> deduct 2000 and ladder 1000/500/100. `SelectBALicenses` over-adds (deduction guarded
   by `>= 2000`; Integer rounding) - read and correct its output every time.
 - **Source:** SDA 2026-09-28 | GTS standard | scope: always
+- **Large sites:** the macro only knows the 5000/1000/500/100 ladder (and rounds the 5000 count up:
+  93,378 -> CCA-5000-BA x19). The Pricelist also holds `CCA-10000-BA`, `CCA-30000-BA`,
+  `CCA-100000-BA` - above ~20,000 points price the cheapest cover (RDC108: 93,378 incl. spare ->
+  CCA-100000-BA x1 339k vs ladder 865k). `GenerateWorstation` also stopped on a VBA error there (hidden
+  instance shows window title "Microsoft Visual Basic" with CPU idle): write F2:G with its logic by hand.
+  (RDC108 2026-10-27 | my finding | scope: always)
 
 ## Workstation hardware follows the client BOQ head-end lines
 - **Rule:** The template macro sets licences only; PCs, monitors, printers, UPS default to 1 and there
@@ -337,12 +402,28 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   Pricelist row at UP 0 (see G).
 - **Source:** Al Moosa 2026-10-05 | GTS standard | scope: always | "I PUT ONLY 8 WORKSTATION AND I FORGET LASER"
 
-## FCU controllers through RoomUnits/FCUs - never a hand-typed model
-- **Rule:** FCU device = `[FCU Controller]`; set Options B13 to the real protocol; `LoadRoomUnits`,
-  choose the controller from the dropdown. The FCUs sheet prices controllers only. Never price two
-  controllers on one FCU (RDF440BN is complete; DXR2 needs a QMX3). Al Moosa: RDF440BN alone, with a
-  Cover Page note that it replaces the BOQ's "IP unitary controller".
-- **Source:** Al Moosa 2026-10-05 | GTS standard (path) / this project (RDF440BN) | scope: always (path)
+## FCU / VAV controllers are device rows in the IOSummary block - never `[FCU Controller]`
+- **Rule:** FCU block = Integration row 7 SP (`BACNET/MSTP`) + a device row `[Room Thermostat]
+  [Modulating]` -> RDF440BN (complete controller, M = qty). VAV block = Integration 7 SP
+  (`BACNET/IP`) + device rows `[VAV] [IP Unitary Controller] [DXR1]` -> DXR1.M09PLZ-112 and
+  `[Room] [Thermostat] [QMX1]` -> QMX1.M34H (add both to FieldDevices if the template lacks them -
+  both are in the Pricelist). Never use `[FCU Controller]` / `[VAV Controller]` (they point to the RU
+  Selection Sheet; RoomUnits is empty in every finished GTS project, so nothing gets priced). Never
+  price two controllers on one FCU. Al Moosa: RDF440BN with a Cover note that it replaces the BOQ's
+  "IP unitary controller".
+- **Source:** Al Moosa final workbook (RDF440BN x458, DXR1 + QMX1 x691 as IOSummary devices, RoomUnits empty), RAPEH BOQ (RDF440BN x10), Rotortrade 2026-10-14 estimator removed [FCU Controller] | my error (old rule said RoomUnits path - did not match the finished workbooks) | scope: always | "i think in no place we add controller of FCU ... recheck another project"
+- **Confirmed again:** Rotortrade 2026-10-14 the estimator briefly asked for a controller + thermostat pair (DXR2 + QMX3), then, shown that Al Moosa / Ajyad used RDF440BN alone, chose RDF440BN. When the estimator says "like the previous project" for FCUs, show the previous workbook's FCU device row first (RDF440BN), do not assume a controller + room unit pair.
+
+## VFDs are not priced
+- **Rule:** Speed-control AO rows carry no `[Variable Frequency Drive]` device; leave the VFDs sheet
+  empty and add the Cover note "VFDs by mechanical contractor".
+- **Source:** Al Moosa, Rehab, RAPEH, Qiddiya, YALJ (no VFD in any final BOQ), Rotortrade 2026-10-14 estimator removed them | GTS practice (evidence across 5 projects) | scope: always
+
+## Rotortrade: no valves, no meter integration
+- **Rule:** Rotortrade Helipark prices no control valves (coil or isolation) and no meter integration
+  (digital energy meters, water supply meter, MV/MRMU meter SP). Do not generalise - Al Moosa priced
+  coil valves (LEARNED C "Valves").
+- **Source:** Rotortrade 2026-10-14 | estimator instruction (reason not given) | scope: this project | "I DON'T WANT VLAVE AND METERS"
 
 ## One head-end server for the whole campus unless the tender says otherwise
 - **Rule:** Read the client BOQ and risers for the server line. Al Moosa: ONE fault-tolerant
@@ -403,6 +484,13 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   2 x 1 month, accommodation / car / fuel 1 x 1 month, design engineer and technician 1 x 1.5 months,
   no air tickets -> gross margin 29%.
 - **Source:** SDA 2026-09-28, Al Moosa 2026-10-06, Rehab Oasis 2026-10-08 | GTS standard (rates) | scope: always
+
+## Server line follows the drawings, even without the word "redundancy"
+- **Rule:** When the BMS riser draws server units in a BMS server cabinet (Rotortrade: 2 x "SERVER EQUIPMENT"
+  in BMS SERVER-01) or the design basis says "central servers", keep the separate Cover server line and
+  name it after the drawing ("BMS Servers (main + standby, as per riser ...)") with a note that it can be
+  struck without touching the BMS price. Search the tender text for server / redundan / workstation first.
+- **Source:** Rotortrade 2026-10-14 | estimator asked "what do you think" -> my recommendation accepted | scope: always
 
 ## Cover Page: notes must match the BOQ; carry-over lines removed
 - **Rule:** Re-read every note after each BOQ regeneration: nothing excluded that the BOQ prices, no
@@ -467,4 +555,9 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   - `$host` is reserved; `cat` is Get-Content; index as `$v[($r+2),2]`, not `$v[$r+2,2]`; `"$r:"`
     needs `"${r}:"`; `{0,>10}` is invalid; cast every value written to a cell (`[string]`/`[double]`).
     (`$v[$r+2,1]` -> "op_Addition" error, hit again at Rehab 2026-10-07.)
+  - Never name a helper function `R`, `H`, `r`... - built-in aliases (Invoke-History) win over the
+    function. PS 5.1 reads a BOM-less .ps1 as ANSI: a literal "•" lands in Excel as "â€¢" - use
+    `[char]0x2022`. `$x.CutCopyMode = 0` throws via COM - leave it. (RDC108 2026-10-27)
+  - `scripts/audit.ps1` needs Al Moosa's `register.tsv`; on other projects write a project audit of
+    the Phase 7 exit criteria instead. A watcher on a macro must key on the macro's own Excel PID.
 - **Source:** Al Moosa 2026-10-01..07, Rehab Oasis 2026-10-07 | my error | scope: always
