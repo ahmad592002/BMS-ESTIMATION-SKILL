@@ -491,6 +491,13 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   name it after the drawing ("BMS Servers (main + standby, as per riser ...)") with a note that it can be
   struck without touching the BMS price. Search the tender text for server / redundan / workstation first.
 - **Source:** Rotortrade 2026-10-14 | estimator asked "what do you think" -> my recommendation accepted | scope: always
+- **Count the pairs from the rack elevations, and keep the GTS pair price.** RDC108: every building's
+  BMS SERVER RACK-1 (MER 1) holds BMS + EPMS PRIMARY and RACK-2 (MER 2) the SECONDARY; the client BOQ
+  repeats 25.1.60 / 25.1.61 "redundant server" in each building sheet -> 4 pairs = 8 servers,
+  `=4*40650/0.66` (246k). 40,650 SAR = GTS cost of one main + standby pair (Rotortrade; Al Moosa / YALJ /
+  RAPEH 37,000) - it is a house price, NOT template junk: never zero it, multiply it by the pair count.
+  DCIM / NMS servers, firewall, core switches stay out (by others).
+- **Source:** RDC108 2026-10-27 | my error (zeroed the line as carry-over) | scope: always | "why no redundent server in the spec it need two" / "see data of project"
 
 ## Cover Page: notes must match the BOQ; carry-over lines removed
 - **Rule:** Re-read every note after each BOQ regeneration: nothing excluded that the BOQ prices, no
