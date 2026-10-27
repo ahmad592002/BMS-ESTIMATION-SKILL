@@ -272,14 +272,14 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
 - **Source:** SDA 2026-09-28, Al Moosa 2026-10-02 | GTS standard (250 cap) | scope: always; the
   `-1/-2` naming and network-panels-per-floor were Al Moosa choices - confirm on the next project
 
-## Modbus / BACnet IP points are not counted on a DDC - integration rows
-- **Rule:** DDC load (and the 250 gate) = hardwired DI/AI/AO/DO + BACnet MSTP SP only. Equipment that
-  talks Modbus or BACnet IP straight to the BMS / EPMS server goes on integration rows
-  (`INT-<bldg>-CHW PLANT / BMS SERVER / EPMS SERVER`) so Assigned == Total still holds, and loads no
-  controller; in Phase 4 those rows get no controller. Open: whether Modbus RTU (RS485 meter loops,
-  PQM - spec says serial only, sensor loops) stays on the DDC as the unmerged branch
-  `learn/rdc108-ip-integration-no-ddc` says.
-- **Source:** RDC108 AI Data Center 2026-10-26 | estimator instruction | scope: this project, candidate for always | "don't take modbus ip in point counting in the ddc list"
+## Only IP equipment needs no DDC - everything else is counted on a DDC
+- **Rule:** DDC load (and the 250 gate) = hardwired DI/AI/AO/DO + BACnet MSTP SP + Modbus RTU / RS485
+  SP. Only IP equipment (BACnet IP, Modbus TCP/IP - incl. RS485 devices behind a Modbus TCP gateway,
+  e.g. busway) goes on integration rows (`INT-<bldg>-CHW PLANT / BMS SERVER / EPMS SERVER`) so
+  Assigned == Total still holds; those rows get no controller in Phase 4. Decide RTU vs TCP per family
+  from the EPMS schematic link labels, the spec (PQM serial only) and the BOQ wording. Panels over
+  250 incl. spare split into `<drawn name>-1`, `-2`.
+- **Source:** RDC108 AI Data Center 2026-10-26/27 | estimator instruction | scope: this project, candidate for always | "don't take modbus ip in point counting in the ddc list" -> "the only thing don't need it is the ip all other need ddc panel"
 
 
 ## GTS uses PXC, never PLC - every panel is a DDCP
