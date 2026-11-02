@@ -110,6 +110,16 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   check its count equals the EquipmentList qty before Phase 3.
 - **Source:** RDC108 AI Data Center 2026-10-29 | my error, found while building the per-unit register | scope: always
 
+## EquipmentList grouped by category with title rows
+- **Rule:** Lay the EquipmentList out in categories (CHW plant, air side, fans, plumbing pumps, tanks /
+  water treatment, fire, electrical, elevators / low current), each under a bold title row with a
+  subtotal formula in C (`="TITLE  ("&SUM(B..)&" items)"`) and a grand-total text formula after the
+  last row. Title and total rows keep column B EMPTY: GenerateIOPointsFromEquipmentList and the IO
+  sync read only rows whose B is a non-zero number, so they skip them. Keep SN continuous (no SN on
+  titles) and everything inside B2:B120. Widening column F for notes stretches the sheet's macro
+  buttons (placement "move and size") - set them to Placement 2 and park them right of column F.
+- **Source:** Maison de la Lune 2026-11-02 | estimator request (formatting) + my error (buttons) | scope: always (candidate) | "seperate it by category and add like title make the sheet more clear"
+
 ## Equipment comes from the drawings when the client BOQ has no equipment counts
 - **Rule:** Client BOQs often price only controllers, devices and LS items. Build the EquipmentList
   from the BMS risers / schematics (per-tag takeoff workbook: tag -> panel -> room -> interface), then
