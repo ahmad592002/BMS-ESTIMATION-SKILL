@@ -192,6 +192,22 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   stays at 0 with a note saying where they are counted - never double count.
 - **Source:** RDC108 AI Data Center 2026-10-28/29 | estimator instruction (reason not given) | scope: this project, candidate for always | "only item that have io in the data if item don't have ask me" -> "what equipment are not in the io summary use io point from my previous projects"
 
+## I/O tables written per SET or per PIT: points per pump, shared points split
+- **Rule:** When the EquipmentList counts pumps but the consultant table is written per set / per pit
+  (Pump 1 + Pump 2 lines, one system pressure, one tank level), write the block PER PUMP: pump points
+  (run, trip, H/O/A, command, VFD) once per pump, set points (pressure, tank level / high / low, pit
+  alarms) divided by the pumps of the set and rounded up (yellow + note). Never multiply a 2-pump table
+  by the pump count (Maison: 40 sump pumps x per-pit table = 80 pumps). Show the estimator the table
+  with "Pump 1 / Pump 2" when asking - "why counted twice" needed the literal lines.
+- **Source:** Maison de la Lune 2026-11-02 | estimator choice (recommended default) | scope: always (candidate)
+
+## Third-party interface lines (one "Communication" mark) get realistic SP counts
+- **Rule:** A consultant "Third Party Software Interface" list with one mark per system is not 1 SP.
+  Default: electrical meter 10, VRF outdoor unit 20, DX unit 10, lighting control 50, emergency
+  lighting 20, water treatment package 10, generator 20, CO/NO2 panel 10 SP - yellow, Cover note.
+  Electrical feeder tables marked "(*)" without a feeder count: one incoming + one outgoing per panel.
+- **Source:** Maison de la Lune 2026-11-02 | estimator choice (recommended default) | scope: always (candidate)
+
 ## IO-list points not shown on any schematic become SP, not hardwired
 - **Rule:** When the consultant IO list gives more points than the control schematic, keep the drawn
   points hardwired and convert the unnamed extra (alarms, statuses, commands) to software points on an
