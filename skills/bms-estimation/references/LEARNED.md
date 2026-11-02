@@ -170,6 +170,11 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   (lighting circuits per DB, breakers per MDB) use the average rounded UP, yellow, report total in Q.
   The PDF text layer is usually scrambled - read the pages as images (pdftoppm -r 130).
 - **Source:** Rehab Oasis 2026-10-07 | estimator instruction (reason not given) | scope: this project, candidate for always | "just take the io and put it from data to excel as it's don't think in it if set if not"
+- **Confirmed as GTS practice (Maison de la Lune 2026-11-02, scope: always):** follow the consultant I/O
+  schedule as printed for its own items too. An item printed twice (lint interceptor in items 21 AND 41)
+  = 2 units, not one de-duplicated unit. Plant points printed inside an equipment block (CHW header
+  T / P / DP / energy inside the chiller block) stay in that equipment row - no separate "plant
+  header" row. The higher-number rule still applies where drawings show MORE than the I/O.
 
 ## Never use "~" in EquipmentList / IOSummary names
 - **Rule:** Write tag ranges as `CH-01..03`, never `CH-01~03`. Excel lookups treat `~` as an escape
