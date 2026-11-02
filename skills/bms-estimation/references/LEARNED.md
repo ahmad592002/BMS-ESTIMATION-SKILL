@@ -103,6 +103,13 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   "B1-GF-01-18 i think this are 18 equ"; estimator set SP 30, DBWP 9, IRRP 4, FIP 6, RCP 10,
   lighting DB 22, MDB 3, EAF 36, PEAF 12 + PFAF 12
 
+## A BOQ tag listed in two sections is one unit
+- **Rule:** When summing BOQ quantities by family, de-duplicate by tag across sections: RDC108 lists
+  each CRAC in its own section (23.14.3-6) and again inside the FCU list (23.18.26-27) - counting both
+  gave 8 / 12 instead of 6 / 10. Build the per-unit register (tag -> building, floor, room, DDC) and
+  check its count equals the EquipmentList qty before Phase 3.
+- **Source:** RDC108 AI Data Center 2026-10-29 | my error, found while building the per-unit register | scope: always
+
 ## Equipment comes from the drawings when the client BOQ has no equipment counts
 - **Rule:** Client BOQs often price only controllers, devices and LS items. Build the EquipmentList
   from the BMS risers / schematics (per-tag takeoff workbook: tag -> panel -> room -> interface), then
@@ -160,6 +167,15 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   DI instead of 722, VAV SP missing, BOQ short on modules). After GenerateDDCSummary always check
   DDCSummary TOTAL rows == IOSummary grand total.
 - **Source:** Rotortrade 2026-10-14 | my error | scope: always
+
+## IO from the tender point list first; missing equipment -> previous GTS projects
+- **Rule:** Fill each IOSummary block only from the tender's own point lists (transcribe as printed).
+  Equipment with no IO in the tender data: copy the points of the closest block in a previous GTS
+  estimation (Al Moosa first, then YALJ / Rehab / Rotortrade) - name cell yellow, note "copied from
+  <project> <block>" in Q, and list it in the IO Summary Sources workbook. Equipment whose points are
+  already printed inside another block (valves / DPT / BTU inside chiller, tank sensors inside tank)
+  stays at 0 with a note saying where they are counted - never double count.
+- **Source:** RDC108 AI Data Center 2026-10-28/29 | estimator instruction (reason not given) | scope: this project, candidate for always | "only item that have io in the data if item don't have ask me" -> "what equipment are not in the io summary use io point from my previous projects"
 
 ## IO-list points not shown on any schematic become SP, not hardwired
 - **Rule:** When the consultant IO list gives more points than the control schematic, keep the drawn
@@ -270,6 +286,22 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   plant controller panels (CPM / RIO) are still in the BMS price.
 - **Source:** RDC108 AI Data Center 2026-10-26 | estimator instruction | scope: this project, candidate for always | "chilled water only ip integration because it have controller own"
 
+## Reconcile every device against Div 25 BOQ + layout symbols + schematic, and Div 23 BOQ
+- **Rule:** Before presenting Phase 2, build a table per device type: Div 25 BOQ qty | layout symbol
+  count | schematic interface | IOSummary devices. A sensor the Div 23 (mechanical) BOQ supplies in the
+  piping (temperature sensors, DP transmitters, flow sensors) is connected, not supplied - no BMS device.
+  Div 25 device lines are ours (RDC108: 25.1.10 liquid temperature = 3 per thermal storage tank).
+  Partitioned tank = one level transmitter per compartment. A detector drawn under "HARDWIRED SIGNAL" is
+  1 AI, not SP. A standalone "DP switch" row that duplicates the fans' airflow DPS is dropped.
+- **Source:** RDC108 AI Data Center 2026-10-29 | estimator "see in io point and field and data what things you can know and edit and fix" | scope: always (candidate)
+
+## A chiller integrated through its own controller gets NO BMS field devices
+- **Rule:** When the chiller is integration only (via CPM / its own controller), no field device on any
+  chiller point - not even the CHW in / out temperature, flow switch, run-status DPS or chiller DPT the
+  point list wires to the CPM. Other plant items on the same CPM (thermal storage tank, headers) keep
+  theirs unless the estimator says otherwise. Overrides the chiller part of the rule below.
+- **Source:** RDC108 AI Data Center 2026-10-29 | estimator instruction ("since it's integration, everything of the chiller we don't need") | scope: this project, candidate for always | "hala2 bima2enu integration klchi khasu bl chiller we don't need to use it"
+
 ## Integration-only plant still gets its BMS field devices
 - **Rule:** Making a plant IP integration only changes the POINTS, not the SENSORS. Keep a field device on
   every point that needs a physical sensor the BMS supplies (riser shows it on the CPM / RIO, or the Div 25
@@ -278,6 +310,28 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   packages (chiller internals, FAHU controller, pump-panel alarms). Before presenting Phase 2, compare
   every Div 25 device BOQ item with the IOSummary device totals.
 - **Source:** RDC108 AI Data Center 2026-10-27 | estimator correction | scope: always (candidate) | "many point you don't add to it his field device like tempreture of chiller head and bottom"
+- **Again 2026-10-29:** "chw in tempreture this need temp sensor look to all other". Test EVERY point the
+  point list prints as hardwired (AI / DI to DDC, PLC or CPM) - even when it is sent to the BMS as SP:
+  a measured value (temperature, pressure, DP, flow, level, airflow) gets its sensor. Chiller CHW in/out
+  temperature = 2 immersion per chiller, chiller / index DP = QBE3000-D16, tank flowmeters = F-3500 (yellow
+  where the Div 23 BOQ also lists them). Points read from a packaged unit's own controller (FWU, CDU,
+  CRAH, UPS, generator...) get none.
+- **The point list REMARKS column decides it (2026-10-29 recheck):** "Temp Sensor / Pressure Switch /
+  DP Sensor / level transmitter ... to DDC / CPM" = BMS device (incl. chiller run status DPS, integral
+  pump run status pressure switch, fire pump flow = pressure sensor, TX exhaust fan run = fan DPS);
+  "Free Contact to DDC" = volt-free contact from the equipment panel = no device; "Sensor-Inbuilt of
+  the tank" = no device; "Software from CPM to BMS" (evaporator / condenser refrigerant temperature,
+  oil, compressor) = the chiller's own sensors, read over the network = no device. When the estimator
+  asks for a sensor on such a point, show the remark and the spec line (BAS reads chiller data from the
+  chiller microprocessor) before adding one.
+
+## Point names: equipment named on every point, no abbreviations, no duplicates
+- **Rule:** Every point name says which equipment it belongs to ("CDU RUN STATUS", "MDB BUS COUPLER
+  BREAKER TRIP STATUS", never a bare "RUN STATUS"); expand H/O/A, MV, PICV, TST, CHW/CW, BC, SPD, REF,
+  SOC/SOH; fix the consultant's typos; split combined values ("TEMPERATURE & HUMIDITY", "SPEED CONTROL &
+  FEEDBACK") into one point each; printed sub-headings ("ATS & UPS FOR FWU") are grey titles, not points;
+  a line printed twice in the same system is one point.
+- **Source:** RDC108 AI Data Center 2026-10-29 | estimator correction | scope: always (candidate) | "see all io point name many of them not complete"
 
 ## Device count: BOQ vs points -> keep the highest; every status point gets its device
 - **Rule:** Audit every hardwired point against column O before presenting Phase 2/5. Where the Div 25
@@ -350,6 +404,33 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   column Q) to PXC5.E24 (16 UIO + 2 DI + 6 RO, 120 SP - strictly more than PXC4) and recheck. Controllers!L
   follows column Q (SUMIFS), so the BOQ picks it up on the next StartBOQGeneration.
 - **Source:** Rotortrade 2026-10-14 | my error (gate not checked before BOQ) | scope: always
+
+## GenerateWorstation "Overflow" above ~35,000 BA points - Integer counters
+- **Rule:** `WorstationModule.SelectBALicenses` (also FIRE / ELEC / SCADA) declares the licence counters
+  `As Integer`; `BA5000 * 5000` overflows (runtime error 6) once BA x (1 + spare) >= 35,000. Estimator
+  approved the fix: change those four `Dim ... As Integer` lines to `As Long` (RDC108 workbook fixed
+  2026-10-29; master template NOT changed - apply the same 4 lines when a big project hits it). The macro
+  still only knows the 5000/1000/500/100 ladder - compare with CCA-10000/30000/100000-BA in the Pricelist.
+- **Source:** RDC108 AI Data Center 2026-10-29 | estimator "fix it" | scope: always (this bug)
+
+## Keep the template's default controller selection - never patch the template VBA
+- **Rule:** Run `SelectControllersForSheet` and keep its result as the selection, even where the
+  PROVIDED row shows less SP than needed (the macro sizes on DI/AI/AO/DO only - it never reads SP).
+  Do not edit the template / workbook VBA and do not re-select by hand; REPORT the panels where PROVIDED <
+  TOTAL WITH SPARE so the estimator decides. (A VBA patch was made and tested on RDC108 2026-10-29 and
+  reverted the same day at the estimator's request - template restored byte-identical.)
+  Run macros in a NEW hidden Excel only after `Windows(1).Visible = $true` (a hidden window gives VBA 1004).
+- **Source:** RDC108 AI Data Center 2026-10-29 | estimator instruction | scope: always (candidate) | "reset it to the previous code and keeep the default selection"
+
+## Serial-SP-heavy panels: re-select the station by the template's own PROVIDED logic
+- **Rule:** SelectControllersForSheet sizes on hardwired IO and picks PXC4 compacts even when a panel
+  carries 150-200 serial software points (RS485 meters, electrical-PLC breakers). After it runs, re-pick
+  every block with PROVIDED < TOTAL WITH SPARE: station SP provided = station SP - (DI + AI + AO + DO
+  provided by the modules), so choose the smallest PXC7.E400S / M / L + TX-I/O mix that fits (RDC108
+  power-module panels: 44 HW + 205 SP -> E400L). Same accessories as the macro: K12/K24 (+K-48 > 24
+  modules), TXS1.12F10 + TXS1.EF10. Network (INT-) rows: clear their controllers - IP equipment needs
+  no DDC. Log the manual edits: GenerateDDCSummary wipes them.
+- **Source:** RDC108 AI Data Center 2026-10-29 | my finding (82 of 108 panels failed SP after the macro) | scope: always
 
 ## Address keys must cover every TX-I/O module on a panel
 - **Rule:** After SelectControllersForSheet, a panel with more than 24 TX-I/O modules needs TXA1.K24 (1-24)
@@ -491,6 +572,14 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   name it after the drawing ("BMS Servers (main + standby, as per riser ...)") with a note that it can be
   struck without touching the BMS price. Search the tender text for server / redundan / workstation first.
 - **Source:** Rotortrade 2026-10-14 | estimator asked "what do you think" -> my recommendation accepted | scope: always
+- **The Cover line is the REDUNDANCY servers only - count the secondary/standby units.** The primary
+  server is not on that line. RDC108: each building's BMS SERVER RACK-2 (MER 2) holds BMS SECONDARY +
+  EPMS SECONDARY -> 4 redundancy servers, `=4*40650/0.66` (246k), title "Redundancy Servers (4 no. ...)".
+  40,650 SAR = GTS cost per redundancy server (Rotortrade; Al Moosa / YALJ / RAPEH 37,000) - a house
+  price, NOT template junk: never zero it, multiply it by the count. Count from the rack elevations and
+  the per-building BOQ items. DCIM / NMS servers, firewall, core switches stay out (by others).
+- **Source:** RDC108 2026-10-27 | my error (zeroed the line as carry-over, then labelled it "8 servers")
+  | scope: always | "why no redundent server in the spec it need two" / "i just put in the cover page redundent server not server"
 
 ## Cover Page: notes must match the BOQ; carry-over lines removed
 - **Rule:** Re-read every note after each BOQ regeneration: nothing excluded that the BOQ prices, no
@@ -503,7 +592,12 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   data", "for the CO gas system we estimate 10 sensor per system". The lower notes block (rows ~88+:
   FCU transformers, chiller plant manager, AHUs from chilled water riser) is carried over from older
   projects - flag it in the final review, never delete it yourself.
-- **Source:** SDA 2026-09-28, Al Moosa 2026-10-06, Rehab Oasis 2026-10-08 | GTS standard | scope: always
+  Add out-of-scope notes per system (chiller = points from the CPM only; packaged units, EPMS,
+  low current = integration only; say what is by others). Write them the way the estimator does:
+  plain, short, one or two sentences, one line where possible - no long tag lists, no
+  "Division 23 / PICS / cause and effect" wording. (RDC108 2026-10-29: "keep note look like human
+  and easy and brief")
+- **Source:** SDA 2026-09-28, Al Moosa 2026-10-06, Rehab Oasis 2026-10-08, RDC108 2026-10-29 | GTS standard | scope: always
 
 ---
 
@@ -544,6 +638,13 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   (`Windows(1).Visible = $true`). For a read-only check while the live window is busy, open the SAVED
   file in a separate `New-Object Excel.Application` with `AutomationSecurity = 3`, ReadOnly.
 - **Source:** Al Moosa 2026-10-06 / 10-07 | my error | scope: always
+
+## Attach with Windows PowerShell 5.1; a Protected View workbook needs the estimator
+- **Rule:** Run COM attach scripts with `powershell.exe` (5.1): PowerShell 7 has no
+  `Marshal.GetActiveObject`, so the attach silently fails. A tender file in OneDrive / downloaded opens
+  in Protected View and is NOT in `Workbooks` - ask the estimator to click "Enable Editing"; never
+  script around Protected View. Do the side files (takeoff workbook, state file) meanwhile.
+- **Source:** Maison de la Lune 2026-11-02 | my error + project condition | scope: always
 
 ## PowerShell traps that already cost real damage
 - **Rule:**
