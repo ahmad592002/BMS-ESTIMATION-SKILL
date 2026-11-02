@@ -263,8 +263,13 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   QBM81-10, duct T&RH QFM2120, duct T QAM2112.040, duct static QBM3020-5, duct AQ QPM2100, water temp
   QAE2120.010, water DPT QBE3000-D16, water DPS PL-FD113 (Sontay - not Siemens, keep it out of the
   Product Finder), pressure QBE2003-P16, float AX-LS-FL-1HM/-1LM/-2LH, level AX-UL-SEP380-2, room
-  thermostat RDF440BN, room AQ IAQRM5XC (Greystone), CO/NO2 Greystone. No device for duct smoke
-  (by FA) or sprinkler flow switches. Column O is a VLOOKUP on N - write the FieldDevices!A text in N,
+  thermostat RDF440BN, room AQ IAQRM5XC (Greystone), CO/NO2 Greystone. No device for sprinkler flow
+  switches. **Duct smoke detector status = SL-2000-P** (+ DST1.5 sampling tube: set FieldDevices!F122
+  to `SL-2000-P` - the template ships `D4120`, so the tube is never counted on Siemens projects).
+  Any "flow status" point gets a sensor even when the remark says volt-free contact: fan flow ->
+  QBM81-5, pump / water flow -> QVE1901, across-chiller DP switch -> PL-FD113. Before presenting
+  Phase 2, list every hardwired point without a device and sort sensors from panel contacts
+  (Maison 2026-11-02: "many sensors not assigned like smoke"). Column O is a VLOOKUP on N - write the FieldDevices!A text in N,
   never type O. Column M = `=<per unit>*$A<qty row>` (FieldDevices sums M). A one-project-only model
   is a candidate for the house standard for the same duty.
   Rehab Oasis final picks (estimator, consultant IO list, no drawings): fan DPS QBM81-3, filter DPS
