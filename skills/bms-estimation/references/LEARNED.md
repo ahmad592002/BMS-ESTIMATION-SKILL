@@ -264,12 +264,18 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   QAE2120.010, water DPT QBE3000-D16, water DPS PL-FD113 (Sontay - not Siemens, keep it out of the
   Product Finder), pressure QBE2003-P16, float AX-LS-FL-1HM/-1LM/-2LH, level AX-UL-SEP380-2, room
   thermostat RDF440BN, room AQ IAQRM5XC (Greystone), CO/NO2 Greystone. No device for sprinkler flow
-  switches. **Duct smoke detector status = SL-2000-P** (+ DST1.5 sampling tube: set FieldDevices!F122
-  to `SL-2000-P` - the template ships `D4120`, so the tube is never counted on Siemens projects).
-  Any "flow status" point gets a sensor even when the remark says volt-free contact: fan flow ->
-  QBM81-5, pump / water flow -> QVE1901, across-chiller DP switch -> PL-FD113. Before presenting
-  Phase 2, list every hardwired point without a device and sort sensors from panel contacts
-  (Maison 2026-11-02: "many sensors not assigned like smoke"). Column O is a VLOOKUP on N - write the FieldDevices!A text in N,
+  switches. Any "flow status" point gets a sensor even when the remark says volt-free contact: fan
+  flow -> QBM81-5, pump / water flow -> QVE1901, across-chiller DP switch -> PL-FD113.
+  **Before presenting Phase 2, list every hardwired point without a device, then decide each from the
+  SPEC's controls-device section (Div 23 0913 / 25), not from habit** (Maison 2026-11-02: estimator
+  said "many sensors not assigned like smoke" -> "check specs"):
+  - duct smoke detectors: only if the controls device list includes them; else by FA, point only
+    (Maison: not in 230913 -> removed). If ever priced: SL-2000-P + DST1.5, and set FieldDevices!F122
+    to `SL-2000-P` (template ships `D4120`, so the tube is never counted on Siemens projects);
+  - current sensing switches for run status: GTS practice = MCC auxiliary contact, no device, even
+    when the spec asks for CTs - Cover note (Maison: estimator chose MCC contact, spec 2.1.G.2);
+  - BTU / thermal energy meter: ours when the controls spec says "provide" (Maison 230913 2.1.F,
+    Onicon System-10 / F-3500, 1 per plant - device qty fixed, not x chiller qty). Column O is a VLOOKUP on N - write the FieldDevices!A text in N,
   never type O. Column M = `=<per unit>*$A<qty row>` (FieldDevices sums M). A one-project-only model
   is a candidate for the house standard for the same duty.
   Rehab Oasis final picks (estimator, consultant IO list, no drawings): fan DPS QBM81-3, filter DPS
