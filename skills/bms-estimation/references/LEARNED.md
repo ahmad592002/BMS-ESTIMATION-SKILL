@@ -597,6 +597,19 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   Workstation (`audit.ps1` / the cross-check in `revision_facts.ps1`), and selling = cost x qty / 0.6.
 - **Source:** SDA 2026-09-28 | my error | scope: always
 
+## Final BOQ: recheck manual DDCSummary edits, damper end switches, contingency
+- **Rule:** (1) Immediately before the final StartBOQGeneration, recount Controllers!L and the
+  PROVIDED >= TOTAL WITH SPARE check - the estimator may rerun Generate DDC Summary / Select
+  Controllers in the live window, which silently wipes manual station swaps and the cleared INT-row
+  controllers (Maison: E400M fixes and 5 INT PXC5.E003 came back). StartBOQGeneration and
+  GenerateWorstation do NOT wipe them. (2) LoadDamperActuators sets End Switch only when the DI is on
+  the same row as the command; with separate command / status rows set End Switch = Yes in
+  T_DamperActuators before DamperActuatorDefaultSelection (gives GCA126.1E). (3) Breakdown E.26
+  contingency: I71 = `=H71` and H71 is empty in the V04 template -> contingency 0; tell the estimator
+  (suggest H71 `=F71*I42`). (4) The estimator edits commercial cells (BOQ M2 margin, Breakdown E23)
+  while you work - re-read them before quoting, never reset them.
+- **Source:** Maison de la Lune 2026-11-02 | my findings during Phase 7 | scope: always
+
 ## Breakdown expenses and resources from GTS history
 - **Rule:** Sections E/F generate nothing. Rates (SAR/month): per diem 3,000 and accommodation 3,000
   per person; rental car 2,500; fuel 600; air ticket 1,200 each; T&C engineer 13,000; design engineer
