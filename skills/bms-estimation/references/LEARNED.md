@@ -24,6 +24,16 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
 
 ## A. Way of working
 
+## Every question on the live Queries page, answers read back from it
+- **Rule:** Put every question as a card on the project's Queries artifact
+  (`references/questions-board.html`, SKILL.md "Queries page"), not only in the chat. Take the answers
+  from the page (its "Send answers to Claude" comment, then `Artifact read`), apply them, mark each
+  card Applied with a resolution, republish.
+- **Source:** King Abdallah Mosque 2026-11-11 | estimator preference | scope: always | "every question
+  should be in an artifact cards and the response should be getting from my answer in the artifact
+  in live time"
+
+
 ## One phase per invocation, then stop
 - **Rule:** Complete one phase, present it, stop. Never chain phases; never mark DONE without approval
   or an explicit "next".

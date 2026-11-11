@@ -29,6 +29,8 @@ phase runs - do not load them all.
    Product Finder) - see LEARNED.md - and run `scripts/audit.ps1`.
 8. **Present for review** - the real rows and counts, not "done" - with numbered assumptions and
    numbered questions, each carrying a proposed default so "yes to all" is a valid reply.
+   **Every question goes on the project's live Queries page as a card** (see "Queries page" below),
+   never only in chat; the chat reply gives the link and a one-line summary of what is open.
 9. **Update `_ESTIMATION_STATE.md`**: mark the phase `AWAITING REVIEW`, log decisions and questions.
 10. **STOP.** End with: `Phase N ready for your review. Reply with corrections, or "next" to move to
     Phase N+1.`
@@ -105,8 +107,31 @@ equipment cannot be mapped to a `TemplateLists` type; scope is ambiguous (supply
 + T&C; is MCC ours? is FA ours?); protocol, brand or spare factor is unstated; the client BOQ and the
 mechanical schedule disagree; something is drawn but never scheduled.
 
-Ask as a numbered list with a proposed default for each. Never silently invent equipment, and never
+Ask as a numbered cards with a proposed default for each. Never silently invent equipment, and never
 silently drop what you cannot classify - list it as an open question.
+
+## Queries page - every question is a live card, answers come back from it
+
+One Artifact per project, `<Project> BMS Queries`, built from `references/questions-board.html`
+(replace `__PROJECT__`, `__DATE__`, fill the `qa-state` JSON). Publish it with
+`capabilities: {artifact: {}, comments: {}}` and keep its URL in `_ESTIMATION_STATE.md`.
+
+- **Card shape** (in `qa-state.questions`): `id` (Q1, Q2... continuous across phases), `phase`,
+  `topic`, `text`, `why`, `refs` (drawing / BOQ row / spec clause), `options` [{label, desc}],
+  `recommended` (index of the proposed default, listed first), `answer` null, `status` `open`,
+  `resolution` "".
+- **The estimator answers on the page**: pick an option and/or write a note, press "Send answers to
+  Claude". The page sends a comment to Claude (`comments.sendToClaude` - this starts a turn) and then
+  republishes itself with the answers saved (`artifact.publish`, status `answered`).
+- **On that comment, or when the estimator says "answers sent"**: read the live page
+  (`Artifact action: read`), apply every `answered` card, set it to `applied` with a one-line
+  `resolution` saying what changed, merge onto the live version and republish. A note like "idk" =
+  keep the proposed default, yellow, and list it for the consultant RFI.
+- **Publish conflicts are normal** (the estimator saved while you edited): merge their saved
+  answers into your file from the refusal's live HTML and publish again - never drop an answer.
+- New phase -> append its cards to the same page; answered and applied cards stay as the record.
+  The chat reply still ends with the phase sign-off line.
+
 
 ## Self-upgrade: ask WHY, then record
 
@@ -166,6 +191,7 @@ Never push to `main`, never self-merge, never commit client data (`.gitignore` b
 | `references/workbook-mechanics.md` | Before any workbook read or write |
 | `references/state-template.md` | Creating `_ESTIMATION_STATE.md` at Phase 0 |
 | `references/dump_sheets.ps1` | Reading a workbook without Excel |
+| `references/questions-board.html` | Phase 0: create the project's live Queries page (every question as a card) |
 | `scripts/README.md` | Phases 1-2: takeoff, schematic parsing, IOSummary build, devices, checks |
 
 Reference estimations live in `~/OneDrive/Desktop/GTS/BMS_PROJECTS/` (Ajyad Tower, YALJ, Prince

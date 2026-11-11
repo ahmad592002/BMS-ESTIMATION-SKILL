@@ -1,0 +1,264 @@
+<title>__PROJECT__ BMS Queries</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style id="qa-style">
+/* Layout: one reading column of query cards (like a tender RFI log), sticky status bar, send bar pinned to the bottom */
+:root {
+  --bg: #f3f5f6; --surface: #ffffff; --ink: #18232b; --muted: #5b6b76; --line: #d5dde2;
+  --accent: #0f6c80; --accent-ink: #ffffff; --accent-soft: #dcecf0;
+  --open: #b4580b; --open-soft: #fbead9; --done: #2d7a46; --done-soft: #dcefe2; --sent: #4d5fa8; --sent-soft: #e3e7f6;
+  --f-display: "Archivo Narrow", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+  --f-mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11181d; --surface: #182229; --ink: #e4ebef; --muted: #93a4ae; --line: #2a3841;
+  --accent: #4fb3c8; --accent-ink: #0b1418; --accent-soft: #173842;
+  --open: #f0a05a; --open-soft: #3a2614; --done: #6cc28a; --done-soft: #16301f; --sent: #9aa9ef; --sent-soft: #222a4a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11181d; --surface: #182229; --ink: #e4ebef; --muted: #93a4ae; --line: #2a3841;
+  --accent: #4fb3c8; --accent-ink: #0b1418; --accent-soft: #173842;
+  --open: #f0a05a; --open-soft: #3a2614; --done: #6cc28a; --done-soft: #16301f; --sent: #9aa9ef; --sent-soft: #222a4a; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 96px }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg) }
+.wrap { max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px }
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 18px 12px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .06em; color: var(--muted); text-transform: uppercase }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: 30px; line-height: 1.1; margin: 0; text-wrap: balance }
+.counts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+.pill { font-family: var(--f-display); font-weight: 600; font-size: 14px; letter-spacing: .03em; padding: 3px 10px; border-radius: 999px; border: 1px solid transparent; white-space: nowrap }
+.pill.open { background: var(--open-soft); color: var(--open) }
+.pill.sent { background: var(--sent-soft); color: var(--sent) }
+.pill.done { background: var(--done-soft); color: var(--done) }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px }
+.tab { font: 600 14px var(--f-display); letter-spacing: .03em; padding: 5px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); cursor: pointer }
+.tab[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+.tab:focus-visible, .opt:focus-visible, textarea:focus-visible, .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.phase-h { font-family: var(--f-display); font-weight: 700; font-size: 15px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 8px 0 -6px }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0 }
+.card.is-open { border-left: 4px solid var(--open) }
+.card.is-sent { border-left: 4px solid var(--sent) }
+.card.is-done { border-left: 4px solid var(--done) }
+.card-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap }
+.qid { font-family: var(--f-mono); font-weight: 600; font-size: 14px; color: var(--accent) }
+.topic { font-family: var(--f-display); font-weight: 600; font-size: 18px; flex: 1 1 200px; min-width: 0 }
+.qtext { margin: 0; font-size: 16px }
+.why { margin: 0; font-size: 14px; color: var(--muted) }
+.refs { font-family: var(--f-mono); font-size: 12px; color: var(--muted); overflow-wrap: anywhere }
+.opts { display: flex; flex-direction: column; gap: 8px }
+.opt { text-align: left; display: grid; grid-template-columns: 20px 1fr; gap: 10px; align-items: start; width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; cursor: pointer }
+.opt .dot { width: 16px; height: 16px; margin-top: 3px; border-radius: 50%; border: 2px solid var(--muted) }
+.opt[aria-checked="true"] { border-color: var(--accent); background: var(--accent-soft) }
+.opt[aria-checked="true"] .dot { border-color: var(--accent); background: radial-gradient(circle, var(--accent) 45%, transparent 50%) }
+.opt-label { font-weight: 600 }
+.opt-desc { display: block; font-size: 14px; color: var(--muted) }
+.rec { font: 600 12px var(--f-display); letter-spacing: .05em; color: var(--done); margin-left: 6px; text-transform: uppercase }
+.opt:disabled { cursor: default; opacity: .85 }
+label.note-l { font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 4px }
+textarea { width: 100%; min-height: 56px; resize: vertical; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 15px var(--f-body) }
+.resolution { font-size: 14px; background: var(--done-soft); color: var(--ink); border-radius: 8px; padding: 8px 12px }
+.resolution b { color: var(--done); font-family: var(--f-display); letter-spacing: .03em }
+.answer-line { font-size: 14px; color: var(--muted) }
+.empty { color: var(--muted); padding: 24px 0 }
+.sendbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; background: var(--surface); border-top: 1px solid var(--line);
+  padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)) }
+.sendbar-in { max-width: 780px; margin: 0 auto; display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap }
+.sendmsg { font-size: 14px; color: var(--muted); min-width: 0 }
+.btn { font: 700 15px var(--f-display); letter-spacing: .04em; padding: 10px 18px; border-radius: 8px; border: 0; background: var(--accent); color: var(--accent-ink); cursor: pointer }
+.btn:disabled { opacity: .45; cursor: default }
+@media (prefers-reduced-motion: no-preference) { .opt, .tab { transition: background-color .15s, border-color .15s } }
+</style>
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow" id="proj">BMS estimation queries</div>
+    <h1 id="ttl">__PROJECT__ BMS Queries</h1>
+    <div class="counts" id="counts"></div>
+    <div class="tabs" id="tabs" role="toolbar" aria-label="Filter"></div>
+  </header>
+  <main id="list" aria-live="polite"><p class="empty">Loading queries…</p></main>
+</div>
+<div class="sendbar"><div class="sendbar-in">
+  <span class="sendmsg" id="sendmsg">Pick an answer on each open query, then send.</span>
+  <button class="btn" id="send" type="button" disabled>Send answers to Claude</button>
+</div></div>
+<script type="application/json" id="qa-state">{"project":"__PROJECT__","updated":"__DATE__","questions":[]}</script>
+<script id="qa-app">
+(function () {
+  var state = JSON.parse(document.getElementById('qa-state').textContent);
+  var drafts = {};   // id -> {choice, note}, not yet sent
+  var filter = 'open';
+  var artifactNs = null, commentsNs = null, notified = null, canPublish = true, sending = false;
+  try { var saved = JSON.parse(localStorage.getItem('qa-drafts') || '{}'); if (saved && typeof saved === 'object') drafts = saved; } catch (e) {}
+  if (window.claude && window.claude.hot && window.claude.hot.data && window.claude.hot.data.drafts) drafts = window.claude.hot.data.drafts;
+  if (window.claude && window.claude.hot && window.claude.hot.snapshot) { try { window.claude.hot.snapshot(function () { return { drafts: drafts }; }); } catch (e) {} }
+
+  // drop drafts for questions that are no longer open
+  Object.keys(drafts).forEach(function (id) { var q = find(id); if (!q || q.status !== 'open') delete drafts[id]; });
+
+  function find(id) { for (var i = 0; i < state.questions.length; i++) if (state.questions[i].id === id) return state.questions[i]; return null; }
+  function saveDrafts() { try { localStorage.setItem('qa-drafts', JSON.stringify(drafts)); } catch (e) {} }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function statusOf(q) { return q.status === 'applied' ? 'done' : q.status === 'answered' ? 'sent' : 'open'; }
+
+  function renderCounts() {
+    var n = { open: 0, sent: 0, done: 0 };
+    state.questions.forEach(function (q) { n[statusOf(q)]++; });
+    var c = document.getElementById('counts'); c.textContent = '';
+    c.appendChild(el('span', 'pill open', n.open + ' open'));
+    c.appendChild(el('span', 'pill sent', n.sent + ' sent, waiting for Claude'));
+    c.appendChild(el('span', 'pill done', n.done + ' applied'));
+    document.getElementById('proj').textContent = state.project + ' · updated ' + state.updated;
+  }
+
+  function renderTabs() {
+    var t = document.getElementById('tabs'); t.textContent = '';
+    [['open', 'Open'], ['sent', 'Sent'], ['done', 'Applied'], ['all', 'All']].forEach(function (p) {
+      var b = el('button', 'tab', p[1]); b.type = 'button'; b.setAttribute('aria-pressed', String(filter === p[0]));
+      b.addEventListener('click', function () { filter = p[0]; render(); });
+      t.appendChild(b);
+    });
+  }
+
+  function card(q) {
+    var st = statusOf(q), d = drafts[q.id];
+    var c = el('article', 'card is-' + st); c.id = 'card-' + q.id;
+    var h = el('div', 'card-head');
+    h.appendChild(el('span', 'qid', q.id));
+    h.appendChild(el('span', 'topic', q.topic));
+    h.appendChild(el('span', 'pill ' + st, st === 'open' ? 'Open' : st === 'sent' ? 'Sent' : 'Applied'));
+    c.appendChild(h);
+    c.appendChild(el('p', 'qtext', q.text));
+    if (q.why) c.appendChild(el('p', 'why', q.why));
+    if (q.refs) c.appendChild(el('div', 'refs', 'Ref: ' + q.refs));
+
+    var chosen = st === 'open' ? (d ? d.choice : null) : (q.answer ? q.answer.choice : null);
+    var opts = el('div', 'opts'); opts.setAttribute('role', 'radiogroup'); opts.setAttribute('aria-label', q.id + ' answer');
+    (q.options || []).forEach(function (o, i) {
+      var b = el('button', 'opt'); b.type = 'button'; b.id = 'opt-' + q.id + '-' + i;
+      b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(chosen === i));
+      b.disabled = st !== 'open';
+      b.appendChild(el('span', 'dot'));
+      var body = el('span');
+      var lab = el('span', 'opt-label', o.label); body.appendChild(lab);
+      if (i === q.recommended) body.appendChild(el('span', 'rec', 'Recommended'));
+      if (o.desc) body.appendChild(el('span', 'opt-desc', o.desc));
+      b.appendChild(body);
+      b.addEventListener('click', function () {
+        var cur = drafts[q.id] || { choice: null, note: '' };
+        cur.choice = i; drafts[q.id] = cur; saveDrafts(); render();
+      });
+      opts.appendChild(b);
+    });
+    c.appendChild(opts);
+
+    if (st === 'open') {
+      var l = el('label', 'note-l'); l.appendChild(document.createTextNode('Note or correction (optional)'));
+      var ta = document.createElement('textarea'); ta.id = 'note-' + q.id; ta.value = d ? (d.note || '') : '';
+      ta.addEventListener('input', function () {
+        var cur = drafts[q.id] || { choice: null, note: '' };
+        cur.note = ta.value; drafts[q.id] = cur; saveDrafts(); updateSend();
+      });
+      l.appendChild(ta); c.appendChild(l);
+    } else {
+      if (q.answer && q.answer.note) c.appendChild(el('div', 'answer-line', 'Your note: ' + q.answer.note));
+      if (q.answer && q.answer.answeredAt) c.appendChild(el('div', 'answer-line', 'Answered ' + q.answer.answeredAt));
+      if (q.resolution) { var r = el('div', 'resolution'); r.appendChild(el('b', null, 'Claude: ')); r.appendChild(document.createTextNode(q.resolution)); c.appendChild(r); }
+    }
+    return c;
+  }
+
+  function render() {
+    renderCounts(); renderTabs();
+    var list = document.getElementById('list'); list.textContent = '';
+    var qs = state.questions.filter(function (q) { return filter === 'all' || statusOf(q) === filter; });
+    if (!qs.length) { list.appendChild(el('p', 'empty', filter === 'open' ? 'No open queries. Claude adds the next phase’s queries here.' : 'Nothing here yet.')); updateSend(); return; }
+    var phase = null;
+    qs.forEach(function (q) {
+      if (q.phase !== phase) { phase = q.phase; list.appendChild(el('div', 'phase-h', 'Phase ' + phase)); }
+      list.appendChild(card(q));
+    });
+    updateSend();
+  }
+
+  function ready() { return Object.keys(drafts).filter(function (id) { var d = drafts[id]; return d && (d.choice !== null && d.choice !== undefined || (d.note || '').trim()); }); }
+
+  function updateSend() {
+    var ids = ready(), btn = document.getElementById('send'), msg = document.getElementById('sendmsg');
+    var open = state.questions.filter(function (q) { return q.status === 'open'; }).length;
+    if (sending) { btn.disabled = true; msg.textContent = 'Sending…'; return; }
+    if (!canPublish) { btn.disabled = true; msg.textContent = 'You can read this page but not send answers. Ask the owner for edit access.'; return; }
+    btn.disabled = ids.length === 0;
+    var sentN = state.questions.filter(function (q) { return q.status === 'answered'; }).length, last = '';
+    try { last = localStorage.getItem('qa-notified') || ''; } catch (e) {}
+    if (ids.length) msg.textContent = ids.length + ' of ' + open + ' open queries answered. Sending saves them and tells Claude.';
+    else if (sentN && last && last !== 'sent') msg.textContent = 'Answers saved, but Claude was not notified (' + last + '). Type "answers sent" in the Claude chat.';
+    else if (sentN) msg.textContent = 'Answers sent. Claude marks each one Applied when it is done.';
+    else msg.textContent = open ? 'Pick an answer on each open query, then send.' : 'All queries are answered.';
+  }
+
+  function esc(json) { return json.replace(/</g, '\\u003c'); }
+
+  function buildDoc() {
+    var resetEl = document.head.querySelector('style');
+    var reset = resetEl ? resetEl.textContent : '';
+    var title = '<title>' + document.title.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</title>';
+    var meta = '<meta name="claude:viewport-fit-sides" content="cover">';
+    var font = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">';
+    var style = document.getElementById('qa-style').outerHTML;
+    var shell = '<div class="wrap"><header class="top"><div class="eyebrow" id="proj">BMS estimation queries</div><h1 id="ttl">' + document.getElementById('ttl').textContent.replace(/</g, '&lt;') + '</h1><div class="counts" id="counts"></div><div class="tabs" id="tabs" role="toolbar" aria-label="Filter"></div></header><main id="list" aria-live="polite"><p class="empty">Loading queries…</p></main></div>'
+      + '<div class="sendbar"><div class="sendbar-in"><span class="sendmsg" id="sendmsg">Pick an answer on each open query, then send.</span><button class="btn" id="send" type="button" disabled>Send answers to Claude</button></div></div>';
+    var data = '<script type="application/json" id="qa-state">' + esc(JSON.stringify(state)) + '</scr' + 'ipt>';
+    var app = '<script id="qa-app">' + document.getElementById('qa-app').textContent + '</scr' + 'ipt>';
+    return '<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>' + reset + '</style></head><body>'
+      + title + meta + font + style + shell + data + app + '</body></html>';
+  }
+
+  document.getElementById('send').addEventListener('click', function () {
+    var ids = ready(); if (!ids.length || sending || !artifactNs) return;
+    var today = new Date().toISOString().slice(0, 10);
+    ids.forEach(function (id) {
+      var q = find(id), d = drafts[id]; if (!q || q.status !== 'open') return;
+      q.answer = { choice: (d.choice === undefined ? null : d.choice), other: '', note: (d.note || '').trim(), answeredAt: new Date().toISOString().slice(0, 16).replace('T', ' ') };
+      q.status = 'answered';
+    });
+    state.updated = today;
+    sending = true; updateSend();
+    var summary = 'BMS query answers: ' + ids.map(function (id) {
+      var q = find(id), a = q.answer, o = (a.choice !== null && q.options[a.choice]) ? q.options[a.choice].label : 'no option';
+      return id + ' = ' + o + (a.note ? ' (note: ' + a.note + ')' : '');
+    }).join(' | ');
+    summary = summary.replace(/[\u0000-\u001f\u007f<>]/g, ' ');
+    while (new Blob([summary]).size > 3900) summary = summary.slice(0, -50);
+    var btn = document.getElementById('send');
+    var notify = commentsNs ? commentsNs.canSendToClaude().then(function (s) {
+      if (s !== 'available') { notified = s; return null; }
+      return commentsNs.anchorFor(btn).then(function (anchor) { return commentsNs.sendToClaude({ anchor: anchor, text: summary }); }).then(function () { notified = 'sent'; });
+    }).catch(function (e) { notified = (e && e.code) || 'failed'; }) : Promise.resolve();
+    notify.then(function () {
+      try { localStorage.setItem('qa-notified', notified || ''); } catch (e) {}
+      return artifactNs.publish(buildDoc());
+    }).then(function () {
+      drafts = {}; saveDrafts();
+    }).catch(function (err) {
+      sending = false;
+      var code = err && err.code;
+      if (code === 'not_granted' || code === 'not_writer') { canPublish = false; }
+      // conflict: every view reloads to the newer version; nothing to retry
+      state = JSON.parse(document.getElementById('qa-state').textContent);
+      render();
+      if (code && code !== 'conflict' && canPublish) document.getElementById('sendmsg').textContent = 'Not sent (' + code + '). Your picks are kept; try Send again.';
+    });
+  });
+
+  render();
+  (function connect(n) {
+    if (window.claude && window.claude.use) {
+      window.claude.use('artifact').then(function (ns) { artifactNs = ns; if (!ns) canPublish = false; updateSend(); }).catch(function () { canPublish = false; updateSend(); });
+      window.claude.use('comments').then(function (ns) { commentsNs = ns; }).catch(function () {});
+    } else if (n < 40) { setTimeout(function () { connect(n + 1); }, 250); }
+    else { canPublish = false; updateSend(); }
+  })(0);
+})();
+</script>
