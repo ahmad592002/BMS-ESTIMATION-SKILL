@@ -658,6 +658,17 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   while you work - re-read them before quoting, never reset them.
 - **Source:** Maison de la Lune 2026-11-02 | my findings during Phase 7 | scope: always
 
+## Cover Page: look at it printed before presenting it
+- **Rule:** After any Cover Page edit, export the sheet to PDF (`ExportAsFixedFormat`), render it
+  (`pdftoppm -r 70 -png`) and READ the pages before saying it is done. Check: bullets are `•` (write
+  them as `[char]0x2022` - PS 5.1 turned a literal one into "â€¢"), notes are plain (rows inserted under
+  the bold underlined "Notes" heading inherit its format - set Bold off / Underline none from a template
+  bullet row), every note fits ONE printed line (~80 characters), about 8-10 notes like the estimator's
+  covers, the project name fits the Subject line (short name in H5), the client name goes in F4 next to
+  the "Company:" label in E4, and no near-empty page (remove the template's manual break before
+  "Exclusions:" when Inclusions spill over).
+- **Source:** Pendry Superblock 2026-11-16 | my error (estimator: "the cover page so bad") | scope: always
+
 ## Breakdown expenses and resources from GTS history
 - **Rule:** Sections E/F generate nothing. Rates (SAR/month): per diem 3,000 and accommodation 3,000
   per person; rental car 2,500; fuel 600; air ticket 1,200 each; T&C engineer 13,000; design engineer
