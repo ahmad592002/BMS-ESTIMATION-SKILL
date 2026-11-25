@@ -161,6 +161,16 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   DDCSummary TOTAL rows == IOSummary grand total.
 - **Source:** Rotortrade 2026-10-14 | my error | scope: always
 
+## "Put the IO in" includes the field devices - never leave them for later
+- **Rule:** When the estimator asks for EquipmentList + IO (even "as is", "no edits", "extra fast"),
+  fill the field devices in the same pass (rules below). "No edits" is about the points, not about
+  skipping devices. With a client / consultant IO list only, its instrument column ("From": Air DPS,
+  Duct Temp Sensor, Imm. Temp Sensor, Level Sensor, Air DPT, OD T+RH, Space Temp Sensor) decides the
+  device; signals from a fan / pump / AHU panel or FA panel get none; measured values with no named
+  instrument get the house model in yellow. Price-check every model before presenting (V04 Pricelist
+  already holds QAA2110 and AX-LS-FL-2LH; the Greystone CO/NO2 row is added as at Pendry).
+- **Source:** Porta Jeddah 2026-11-25 | my error | scope: always | "why you don't add field device"
+
 ## IO-list points not shown on any schematic become SP, not hardwired
 - **Rule:** When the consultant IO list gives more points than the control schematic, keep the drawn
   points hardwired and convert the unnamed extra (alarms, statuses, commands) to software points on an
