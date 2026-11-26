@@ -250,9 +250,17 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
 - **Recheck against the "From" column line by line (Porta 2026-11-26, "recheck field device using the
   bms input output summary"):** "Air DPS" on a run status = fan DPS on THAT point (AHU run, supply /
   exhaust fan run - one each, as printed); "From: -" or a Soft-column setpoint = no device, never a duct
-  sensor; panel / FAS / VFD sources = none. Devices the BMS schematics (DWG) draw but the IO list does
-  not name (smoke-fan DPS, room temperature in generator / transformer rooms, AHU RH) go on a card,
-  not into the price. When this undoes an estimator edit, say so on a card and ask why.
+  sensor; panel / FAS / VFD sources = none. When this undoes an estimator edit, say so on a card and
+  ask why.
+- **"Don't forget any field device" - final device sweep before finishing (Porta 2026-11-26):** list
+  every hardwired point without a device (`porta_nodev` pattern: block | point | IO | qty) and sort it:
+  panel / FAS / VFD contacts and commands = none; a device the drawings show on an EXISTING point
+  (DPS on smoke / pressurization fan run status, W.F.M on a tank flow-meter point) = add it, yellow;
+  devices that would need new points (room temperature in generator rooms, AHU RH) = card only.
+  Ask once about the "by others" groups with their price impact (valves + damper actuators, flow
+  meters). Porta estimator picked: fan DPS x30 + 14 tank flow meters (JCI F-1110-10, cheapest flow
+  meter in the Pricelist at 6,800 net - say the impact, +142k SAR), NOT valves / damper actuators.
+  Scope: this project, candidate for always.
 
 ## IO-list points not shown on any schematic become SP, not hardwired
 - **Rule:** When the consultant IO list gives more points than the control schematic, keep the drawn
