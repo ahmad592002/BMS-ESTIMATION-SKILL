@@ -258,8 +258,10 @@ the estimator confirmed as standing practice promoted to `always`. Full history:
   (DPS on smoke / pressurization fan run status, W.F.M on a tank flow-meter point) = add it, yellow;
   devices that would need new points (room temperature in generator rooms, AHU RH) = card only.
   Ask once about the "by others" groups with their price impact (valves + damper actuators, flow
-  meters). Porta estimator picked: fan DPS x30 + 14 tank flow meters (JCI F-1110-10, cheapest flow
-  meter in the Pricelist at 6,800 net - say the impact, +142k SAR), NOT valves / damper actuators.
+  meters). Porta final: fan DPS x30 added; tank water flow meters tried (JCI F-1110-10, 6,800 net
+  each = +142k SAR) then removed - "keep them excluded in the cover page" (water / BTU / energy meters
+  by others, Cover exclusion); valves / damper actuators not priced. So the default for IO-list
+  tenders: meters, valves and damper actuators excluded on the Cover, fan DPS in.
   Scope: this project, candidate for always.
 
 ## IO-list points not shown on any schematic become SP, not hardwired
